@@ -221,6 +221,8 @@ Code documentation includes:
 
 Code documentation should remain close to the code it describes and should not become a substitute for project requirements or specifications.
 
+Default to no module header. Put useful explanations on the API or implementation they concern; a file synopsis or requirement pointer does not earn its place merely by being short.
+
 For detailed guidance, see `references/code.md`.
 
 ## API documentation

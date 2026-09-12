@@ -189,11 +189,13 @@ If the project provides a `<root>/notes` directory, it may contain this informat
 
 Notes should remain primarily about the repository itself. Do not use an external project's issue or discussion as part of the note's explanation. If an upstream behavior affects the repository, record that behavior and the local consequence directly.
 
-An internal comment may explain how an implementation satisfies or works around a requirement and may point to its repository-local note when useful, but the requirement itself should not be duplicated throughout the codebase. Consumer-visible comments must not point to internal notes.
+An internal comment may explain a non-obvious implementation choice caused by a requirement. Add a reference to its repository-local note only when the note provides useful further rationale; keep the essential local consequence in the comment. Do not add requirement IDs merely to label the code that implements them, or replace a redundant explanation with a bare pointer. Consumer-visible comments must not point to internal notes.
+
+The canonical requirement does not replace a public contract or a necessary local warning. Document what a consumer needs to know on the API, and what a maintainer might otherwise break beside the implementation, without repeating the specification.
 
 ## Keep comments close to their subject
 
-Place documentation as close as practical to the code it describes.
+Place documentation where someone using or changing the code will need it. A warning about a workaround belongs beside the line or block someone might mistakenly simplify or remove.
 
 Prefer:
 
@@ -202,6 +204,14 @@ Prefer:
 * A nearby explanation of an important constraint
 
 Avoid distant comments that require readers to search the codebase to understand what they describe.
+
+## Module headers
+
+**Default to no module header.** A file's responsibility should be apparent from its name, location, and contents. Do not add a synopsis, ownership declaration, or export inventory that restates them, even in one or two lines.
+
+A header is justified only when a non-obvious constraint governs the whole module and cannot be attached more usefully to a particular symbol or block. An explanation of one workaround belongs beside that workaround, even if it motivated the file's creation.
+
+Required license notices and tooling directives serve separate purposes and are not subject to this default. Module documentation exposed to consumers must also follow the consumer-visible comment rules above.
 
 ## Avoid duplication
 
