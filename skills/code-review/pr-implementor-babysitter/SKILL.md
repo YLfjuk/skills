@@ -15,6 +15,8 @@ You may resolve a review thread yourself only when you applied the reviewer's su
 
 Use the thread for routine clarifications, requests for more detail, and minor disagreements. Bring a consequential or stalled disagreement to the user with the reviewer's point, the relevant code or behavior, the tradeoff, and a recommendation. Examples include conflicting requirements, a scope change, or a disputed design decision. Continue with independent feedback while waiting. Do not silently dismiss or resolve the disputed thread.
 
+Track feedback and completion signals from every reviewer, including humans and agents. Treat the current head as reviewed only after all requested or participating reviewers have finished reviewing that head and their actionable threads are resolved. After you push any new commit, wait for them to review the new head again, even if they had approved or said they had no further comments on the previous one. Do not treat an earlier completion signal as covering later changes.
+
 Label every comment the agent posts. Use `Agent-authored` when the agent decided on or substantially wrote the point. Use `Agent-assisted at the user's direction` when the user directed the point and asked the agent to phrase or post it. This distinction depends on who directed the substance, even when the same account posts both. Include the agent name or identity when available; never imply a human wrote an agent comment.
 
 Do not merge or close the request unless separately asked. When it closes or merges, stop its monitor and report the final status of addressed and open feedback.
