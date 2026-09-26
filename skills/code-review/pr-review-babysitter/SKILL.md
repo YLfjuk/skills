@@ -1,15 +1,19 @@
 ---
 name: pr-review-babysitter
-description: Review a pull or merge request, then follow its comments and new commits until the review is resolved. Use when acting as the ongoing general reviewer, not the change author.
+description: Review a pull or merge request on its host, including a one-time review. Post findings now even if the user defers monitoring; follow later activity unless deferred. Use when acting as the general reviewer and findings belong on the PR or MR host.
 ---
 
 # PR review babysitter
 
-Review the PR or MR as a general code reviewer. Identify actionable defects with evidence from the change and relevant repository context. When posting an issue, use the host's review or discussion mechanism that lets the team track it as unresolved until addressed. Attach it to a relevant code location when that helps; use a request-level resolvable thread for an issue that has no useful single location. Do not leave an actionable finding only as a general comment that the team cannot track to resolution. General comments are fine for a review summary or an open discussion. If the host has no resolvable mechanism, state the finding clearly and track its status in the review checkpoint. Avoid repeating existing feedback or inventing issues to fill a review.
+Review the PR or MR as a general code reviewer. Identify actionable defects with evidence from the change and relevant repository context. Read applicable repository standards and the references needed to interpret them before concluding the review. Check whether added or moved code and data belong in their files and layers, even when the issue suggests a location; call out conflicts between the issue and repository conventions.
+
+When a change centralizes behavior or data, trace the consumers it is meant to serve. Search code and content files for remaining direct implementations or hard-coded values, and check whether those consumers use the shared source.
+
+When posting an issue, use the host's review or discussion mechanism that lets the team track it as unresolved until addressed. Attach it to a relevant code location when that helps; use a request-level resolvable thread for an issue that has no useful single location. Do not leave an actionable finding only as a general comment that the team cannot track to resolution. General comments are fine for a review summary or an open discussion. If the host has no resolvable mechanism, state the finding clearly and track its status in the review checkpoint. Avoid repeating existing feedback or inventing issues to fill a review.
 
 If local verification would write files, switch branches, or otherwise disturb the implementor's workspace, use a temporary worktree at the commit being reviewed. Do not edit files or run mutating tests in a checkout the implementor may be using. Reuse an existing isolated checkout when one is available, and remove temporary worktrees after verification. Read-only inspection does not require a new worktree.
 
-After the initial review, set up a monitor for the same PR or MR until it closes, merges, or the user ends the assignment. The skill defines what to do when invoked; it does not keep an agent running. Use the available host and scheduler capabilities: prefer an event trigger for comments and commit updates, then a scheduled check if event triggers are unavailable. If neither is available, tell the user that follow-up requires a new invocation. On each wake-up, fetch the current request state before deciding whether work is needed.
+After the initial review, set up a monitor for the same PR or MR until it closes, merges, or the user ends the assignment. If the user defers or declines monitoring, complete the review and post its findings now, then skip the monitor. The skill defines what to do when invoked; it does not keep an agent running. Use the available host and scheduler capabilities: prefer an event trigger for comments and commit updates, then a scheduled check if event triggers are unavailable. If neither is available, tell the user that follow-up requires a new invocation. On each wake-up, fetch the current request state before deciding whether work is needed.
 
 Keep a durable per-request checkpoint with the last reviewed head commit and processed comment or review IDs. If a reliable checkpoint is unavailable, reconstruct what has already been reviewed from the request history before posting. Ignore the agent's own comments as triggers for a reply.
 
