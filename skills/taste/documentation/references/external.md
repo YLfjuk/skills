@@ -132,26 +132,7 @@ A conceptual page should link to the appropriate API reference when detailed inf
 
 ## Tone
 
-Use a tone that is:
-
-* Clear
-* Direct
-* Professional
-* Approachable
-* Practical
-* Confident
-
-Avoid:
-
-* Marketing-heavy prose
-* Excessive enthusiasm
-* Filler
-* Repetition
-* Unnecessary jargon
-* Walls of text
-* Artificially formal language
-
-The documentation should feel curated and intentional rather than automatically generated.
+Explain what users need to know in direct, practical language, without marketing. The documentation should feel curated and intentional rather than automatically generated.
 
 ## Quality bar
 
