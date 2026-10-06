@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review orchestrator"
+  short_description: "Coordinate opt-in specialist code reviews"
+  default_prompt: "Use $review-orchestrator to coordinate specialist reviewers for this PR or MR."
+policy:
+  allow_implicit_invocation: false
