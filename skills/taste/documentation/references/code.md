@@ -1,259 +1,99 @@
-# Code Documentation
+# Code documentation
 
-Use this reference when adding or modifying documentation within the source code.
+Use this reference for doc comments, regular implementation comments, configuration comments, and module documentation.
 
-This includes:
+## Choose the comment form
 
-* TSDoc
-* JSDoc
-* Inline comments
-* API documentation comments
-* Comments explaining non-obvious behavior
+Choose by what the comment describes, not whether the symbol is exported:
 
-## General rule
+* A doc comment describes a symbol's purpose, behavior, or contract for code that uses it.
+* A regular comment explains the reason or constraint behind a particular line or block.
 
-Do not add a comment merely because something can be commented on.
+Internal functions, types, and constants may have doc comments under the same rules as public symbols. Their consumers are the code elsewhere in the repository that uses them.
 
-A comment should communicate information that cannot be understood as easily from the code itself.
+A symbol whose name and type already communicate its purpose and behavior needs no explanatory doc comment, exported or not. Required metadata tags, such as `@since` for a new public API, are a separate concern.
 
-## Don't restate the code
-
-Avoid comments that merely repeat:
-
-* Function names
-* Variable names
-* Types
-* Obvious parameters
-* Obvious return values
-* Straightforward implementation
-
-For example, avoid:
+Do not add comments that repeat names, types, obvious parameters or return values, or straightforward implementation. For example, this adds nothing:
 
 ```ts
 // Get the user by ID
 const user = getUserById(id);
 ```
 
-The code already communicates this.
+If code is unnecessarily hard to understand, consider improving it before explaining it with comments. This does not remove the need to document non-obvious constraints.
 
-## Explain intent
+## Document symbols
 
-Prefer documenting:
+When writing a doc comment, describe the symbol's consumer contract: the behavior, guarantees, and constraints that code using it can rely on. Include purpose, errors, side effects, usage requirements, or non-obvious semantics where the signature leaves them unclear. Explain implementation details only when they affect that contract. Do not mechanically fill out every possible field.
 
-* Why something is done
-* Important constraints
-* Non-obvious assumptions
-* Design decisions
-* Behavioral guarantees
-* Important edge cases
-* Compatibility requirements
-* Reasons for unusual implementation choices
-
-For example:
+A non-exported helper can still need a behavioral guarantee:
 
 ```ts
-// Keep this request sequential because the upstream service applies
-// a per-connection ordering guarantee.
+/** Preserves the first occurrence of each ID and its input order. */
+function uniqueIds(ids: readonly string[]): string[] {
+  return [...new Set(ids)];
+}
 ```
 
-The comment explains information that is not apparent from the code alone.
+Keep implementation rationale beside the implementation. Exporting a symbol does not make its internal details part of the supported contract.
 
-## Don't compensate for poor code
+Follow established doc-comment formatting and tag usage. For public API boundaries, generated reference, and the required `@since` tag, read [API documentation](api.md).
 
-If a comment is needed primarily because the implementation is difficult to understand, consider improving the implementation first.
+## Explain implementation constraints
 
-Prefer:
-
-* Better naming
-* Simpler logic
-* More explicit types
-* Better decomposition
-
-over increasingly detailed comments.
-
-## Third-party and external behavior
-
-Comments may explain non-obvious behavior of:
-
-* Third-party packages
-* Frameworks
-* Build tools
-* Runtime environments
-* Programming languages
-* Platform APIs
-
-This is appropriate when the external behavior explains an otherwise unusual implementation.
-
-Keep these comments focused on the behavior relevant to this code.
-
-Do not use comments as a general-purpose reference manual for the external technology.
-
-### The discriminator
-
-The external technology owns its own documentation. A comment restating it is an unmaintained copy. What the external documentation cannot contain is the effect on *this* code — that is what the comment is for.
-
-**Write the comment when the code carries a plaster.** A workaround, an ordering constraint, a redundant-looking guard, a value that must be exactly this one, an override that appears deletable — anything shaped by external behavior that a reader cannot see from here. These comments are load-bearing: without them the next reader "cleans up" the plaster and reintroduces the problem. Say what breaks, briefly.
+Comment workarounds, ordering requirements, compatibility constraints, unusual values, or redundant-looking guards when a reader could otherwise change them and break behavior. State the local failure and enough of its cause to make the constraint understandable.
 
 ```ts
-// Firing this before the resize settles gives us stale measurements —
-// the observer reports the pre-layout box on first tick.
+// Keep these requests sequential; the upstream service only guarantees
+// ordering within a connection.
 ```
 
-**Skip the comment when nothing here depends on knowing.** A setting that is unremarkable to anyone who knows the tool, a rule's own meaning, an idiom's definition. If deleting the comment leaves the code equally safe to change, delete it.
+For external behavior, ask whether a competent reader who lacks that detail could break this code. If so, explain the consequence here. Otherwise, leave the language, runtime, or tool's explanation to its own documentation.
 
 ```ts
-✗ // The automatic JSX runtime, so `React` does not need to be in scope.
-  "react-in-jsx-scope": "off",
+// Wait for the resize to settle; the observer's first tick reports
+// the pre-layout box and would give us stale measurements.
 ```
 
-Applied in one line: **would a competent reader who doesn't know this external detail break the code?** Yes → comment it, from the consequence inward. No → the detail belongs to its owner.
+Do not turn a comment into an external technology's reference manual. Likewise, do not record development history such as "deferred to a later pass" or "revised from the earlier approach" beside code. Explain the current constraint. Mention a rejected alternative only when someone might plausibly retry it and needs to know the concrete failure or tradeoff.
 
-### Two corollaries
+### Configuration
 
-**A setting's own meaning is never the comment.** Explaining what a rule, flag, or option does documents the tool, not the decision. Comment the ones whose choice is locally surprising; leave the rest bare.
+Leave self-describing configuration entries bare. Explaining a flag or rule's general meaning does not explain a local decision.
 
-**Project decisions are not code comments.** "Deferred to a later pass", "revised from the earlier approach", "chosen over X", and personal preferences record how the work went. They belong in the notes, the plan, or the changelog — not in the file, where they outlive the process they describe. Explain the code through its local requirements and consequences. Name a rejected alternative only when a future reader would plausibly retry it; state the concrete tradeoff or failure it would cause rather than criticizing the alternative.
-
-### Configuration files
-
-Configuration is where this fails most. Every line is a decision, which invites a justification per line — and most of those lines are self-describing to anyone who knows the tool.
-
-Comment the entries that are locally surprising or that break something when changed. Leave the rest bare.
-
-## Public APIs
-
-Public APIs should have appropriate source-level documentation.
-
-Document the public contract rather than the implementation.
-
-Where relevant, document:
-
-* Purpose
-* Behavior
-* Parameters
-* Constraints
-* Return values
-* Errors
-* Side effects
-* Important usage requirements
-* Non-obvious semantics
-
-Do not document internal details simply because a symbol is exported.
-
-## Consumer-visible comments
-
-Treat a comment as consumer-facing whenever it can appear outside the repository through an IDE hover, generated API reference, declaration output, package metadata, or similar tooling. The syntax of the comment and the apparent visibility of the implementation are not reliable boundaries; use the output consumers can actually encounter.
-
-Consumer-visible comments must be self-contained. Do not refer to repository notes, internal documentation, private discussions, implementation plans, or maintainer-only terminology. State the public contract directly, and link only to public documentation intended for the same audience.
-
-Internal comments may reference repository-local notes or internal documentation when those references cannot be surfaced to consumers. Keep the essential local intent or constraint in the comment so that it remains useful without following the reference.
-
-## `@since`
-
-Every newly introduced publicly accessible API must include an appropriate `@since` tag.
-
-Use the project's established versioning convention.
-
-If the future release version is not yet known, temporarily use:
+Comment locally surprising choices or entries whose modification would break something. For example, if a tool replaces its default plugin set when any plugin is listed:
 
 ```ts
-/** @since @next */
+// Listing plugins replaces the defaults; keep `react` listed so its rules still run.
 ```
 
-Replace `@next` with the actual version once it is known.
+## Keep internal references out of doc comments
 
-The project may instead use an automated process to perform this replacement.
+Doc comments must not reference repository notes or internal documentation, even on internal symbols. This keeps the comment usable if the symbol later becomes public.
 
-Do not leave `@next` indefinitely once the release version has been established.
+A useful note reference belongs in a regular comment beside the code it explains, and only when consumer-facing tooling cannot expose it. Consumer visibility depends on actual IDE hovers, generated reference, declarations, or package output, not just comment syntax or export status.
 
-## Documentation tags
+All consumer-visible comments must be self-contained and free of repository notes, private discussions, implementation plans, or maintainer-only terminology. Link only to public documentation for the same audience.
 
-Doc comments must follow established project patterns and tag usage.
+Keep the essential local intent or constraint in a regular comment even when it links to a note. Do not add requirement IDs merely to label implementing code, or replace a redundant explanation with a bare pointer. The canonical requirement does not replace a necessary symbol contract or local warning.
 
-Before adding tags:
+## Place comments where they help
 
-* Inspect existing documentation
-* Follow existing ordering and formatting
-* Reuse established terminology
-* Use only tags that provide useful information
+Attach a doc comment directly to the public or internal symbol it describes. Put implementation rationale beside the line or block someone might change. Avoid distant comments that require searching to find their subject.
 
-Do not introduce new conventions unnecessarily.
+Default to no module header. A synopsis, ownership declaration, export inventory, or requirement pointer does not earn a header merely by being short.
 
-## Requirements and specifications
+A header is justified when a non-obvious constraint governs the whole module and cannot be attached more usefully to a symbol or block. One workaround belongs beside that workaround, even if it motivated the file's creation.
 
-Do not use source-code comments as a distributed requirements document.
+Required license notices and tooling directives are exempt from this default. Consumer-visible module documentation follows the same audience rules as other comments.
 
-Functional requirements, non-functional requirements, product requirements, architectural requirements, and similar project-level information should have a canonical location.
+## Review
 
-If the project provides a `<root>/notes` directory, it may contain this information.
+Apply the shared review in [SKILL.md](../SKILL.md), then check:
 
-Notes should remain primarily about the repository itself. Do not use an external project's issue or discussion as part of the note's explanation. If an upstream behavior affects the repository, record that behavior and the local consequence directly.
-
-An internal comment may explain a non-obvious implementation choice caused by a requirement. Add a reference to its repository-local note only when the note provides useful further rationale; keep the essential local consequence in the comment. Do not add requirement IDs merely to label the code that implements them, or replace a redundant explanation with a bare pointer. Consumer-visible comments must not point to internal notes.
-
-The canonical requirement does not replace a public contract or a necessary local warning. Document what a consumer needs to know on the API, and what a maintainer might otherwise break beside the implementation, without repeating the specification.
-
-## Keep comments close to their subject
-
-Place documentation where someone using or changing the code will need it. A warning about a workaround belongs beside the line or block someone might mistakenly simplify or remove.
-
-Prefer:
-
-* A doc comment directly on a public API
-* A short inline comment beside a non-obvious behavior
-* A nearby explanation of an important constraint
-
-Avoid distant comments that require readers to search the codebase to understand what they describe.
-
-## Module headers
-
-**Default to no module header.** A file's responsibility should be apparent from its name, location, and contents. Do not add a synopsis, ownership declaration, or export inventory that restates them, even in one or two lines.
-
-A header is justified only when a non-obvious constraint governs the whole module and cannot be attached more usefully to a particular symbol or block. An explanation of one workaround belongs beside that workaround, even if it motivated the file's creation.
-
-Required license notices and tooling directives serve separate purposes and are not subject to this default. Module documentation exposed to consumers must also follow the consumer-visible comment rules above.
-
-## Avoid duplication
-
-Do not repeat information that is already clearly available through:
-
-* Types
-* Names
-* Public API documentation
-* Project notes
-* Generated documentation
-
-When duplication is necessary, maintain a clear source of truth.
-
-## Keep comments maintainable
-
-Comments should be updated when the behavior they describe changes.
-
-Remove comments when:
-
-* Their subject no longer exists
-* The behavior has changed
-* The explanation is now obvious from the code
-* The original reason is no longer relevant
-
-Avoid historical comments whose only purpose is to describe how the code used to work.
-
-## Review checklist
-
-Before adding a code comment, ask:
-
-* Is this information non-obvious?
-* Does it explain intent, behavior, or an important constraint?
-* Could the code itself be made clearer instead?
-* Is this really an implementation detail, or does it belong in project documentation?
-* Can a consumer see this comment through an IDE, generated reference, declarations, or package tooling? If so, is it self-contained and free of internal references?
-* Does the rationale come from local requirements and consequences rather than private or personal context?
-* If another tool or approach is named, does the comparison prevent a plausible mistake or explain a tradeoff the reader needs?
-* Am I duplicating information?
-* Who owns this fact? If a tool, a standard, a loaded skill, a note, or the history owns it, does this code have a consequence that earns restating it?
-* Does this code work around external behavior that a reader can't see from here? Then it needs a comment — say what breaks, not how the external thing works.
-* Does it follow existing documentation conventions?
-* Will it remain accurate?
-* If this is a public API, does it have the required `@since` tag?
-
-Prefer **short, high-value comments** over exhaustive explanations.
+* Does the comment form match its subject rather than the symbol's visibility?
+* Does the doc comment add behavior or constraints beyond the name and type?
+* Does each workaround retain the warning needed to prevent a harmful change?
+* Are comments close to their subjects and still accurate?
+* Are note links confined to regular comments that cannot reach consumers?
+* For public APIs, have the API reference's boundary and `@since` rules been applied?

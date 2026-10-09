@@ -1,143 +1,51 @@
-# API Documentation
+# API documentation
 
-Use this reference when documenting a public programmatic API.
+Use this reference for supported public programmatic interfaces and their generated reference. For doc comments on public or internal symbols, also read [code documentation](code.md).
 
-API documentation consists of two related layers:
+## Define the supported API
 
-1. **Source-level API documentation** — documentation attached to public APIs in the source.
-2. **Generated API reference** — the externally navigable reference generated from the public API.
+Only intentionally supported interfaces belong in the public API reference. A technical export alone does not establish support.
 
-These layers should complement each other.
-
-## Public API
-
-Only intentionally supported public APIs should be presented as part of the public API reference.
-
-Do not expose internal implementation details merely because they are technically exported.
-
-When determining the public API, consider:
-
-* Public package exports
-* Supported entry points
-* Public types
-* Documented extension points
-* Explicitly supported interfaces
-
-Follow the project's existing conventions for determining public API boundaries.
+Follow the project's boundaries, including public package exports, supported entry points, public types, and documented extension points. Exclude internal implementation details.
 
 ## Source-level documentation
 
-Source-level documentation should describe the public contract.
+For public APIs, describe the symbol's consumer contract. Add information the signature leaves unclear, such as constraints, errors, side effects, assumptions, and non-obvious semantics. The same content rule applies to internal doc comments.
 
-Where useful, document:
+Source comments should supply useful explanations for developers and feed generated reference where applicable. Self-describing symbols need no explanatory prose, but required metadata still applies.
 
-* Purpose
-* Behavior
-* Parameters
-* Parameter constraints
-* Return values
-* Errors
-* Side effects
-* Important assumptions
-* Non-obvious semantics
-* Usage requirements
-
-Do not reproduce implementation details unless they affect the public contract.
-
-Source-level documentation that can reach consumers through IDE hovers, generated reference, declaration output, package metadata, or similar tooling is external documentation. It must stand on its own and must not refer to repository notes, internal documentation, private discussions, or maintainer-only context. Link only to public documentation intended for the same consumers.
+Follow the code reference's comment-form, audience, and linking rules. Doc comments never reference repository notes or internal documentation. Any source documentation that reaches consumers must stand on its own and link only to public documentation for those readers.
 
 ## `@since`
 
-Every newly introduced public API must include a `@since` tag with the appropriate future version.
+Every newly introduced public API must include a `@since` tag for its release version. Follow the project's versioning and tag-format conventions.
 
-If the version is not yet known:
+If the future version is not yet known, use:
 
 ```ts
 /** @since @next */
 ```
 
-Replace `@next` with the actual release version once known.
+Replace `@next` with the actual release version once known, manually or through the project's automated process. Do not leave it after the version has been established.
 
-An automated process may perform this replacement.
+## Generated reference
 
-## Generated API reference
+Prefer generating reference from source documentation and type information using the project's existing tooling. Avoid manually maintaining a duplicate API specification.
 
-Prefer generating the API reference from the source and its type information rather than manually maintaining a duplicate API specification.
+The reference should be comprehensive and navigable across supported functions, classes, types, interfaces, enums, constants, and configuration objects. Preserve accurate signatures, parameters, return types, generics, and relevant overloads. Exclude private and internal details.
 
-Use the project's existing API documentation tooling when available.
+## Guides and examples
 
-The generated reference should accurately expose the supported public API, including relevant:
+A guide explains when and why to use an API and demonstrates a realistic task. Link to the reference for full signatures, options, and overloads instead of reproducing them.
 
-* Functions
-* Classes
-* Types
-* Interfaces
-* Enums
-* Constants
-* Configuration objects
-* Parameters
-* Return types
-* Generic parameters
-* Relevant overloads
+Include examples when they clarify meaningful usage. Do not create examples solely to exercise every type or overload. Simple APIs may need little beyond their source documentation.
 
-Do not expose private or internal implementation details.
+## Review
 
-## API reference vs conceptual documentation
+Apply the shared review in [SKILL.md](../SKILL.md), then check:
 
-The API reference may be comprehensive.
-
-Conceptual documentation should not be.
-
-For example, a conceptual page might say:
-
-> Use `createBundle` when integrating bundling into another application.
-
-and provide a concise example.
-
-The API reference can then provide:
-
-* The complete signature
-* All parameters
-* Types
-* Return type
-* Overloads
-* Detailed API-level documentation
-
-Do not duplicate the complete generated reference in the conceptual page.
-
-## Examples
-
-Include examples where they meaningfully help developers understand important APIs.
-
-Prefer realistic examples over examples designed solely to demonstrate every possible type or overload.
-
-Simple APIs may need little or no additional prose beyond their source documentation.
-
-## API consistency
-
-Follow the project's established conventions for:
-
-* Naming
-* Documentation tags
-* Version annotations
-* Export boundaries
-* Generated documentation
-* Examples
-* Linking between guides and reference material
-
-Do not invent a new API documentation convention when an existing one is available.
-
-## Review checklist
-
-Before completing API documentation:
-
-* Is every intended public API represented?
-* Are internal implementation details excluded?
-* Are public APIs appropriately documented at the source?
-* Is all consumer-visible source documentation self-contained and free of internal references?
-* Does each new public API have the required `@since` information?
-* Is generated documentation used where appropriate?
-* Are conceptual docs avoiding unnecessary duplication of the API reference?
-* Are signatures and types accurate?
-* Are examples useful rather than exhaustive?
-* Does the documentation follow established project conventions?
+* Every supported public API is represented, and internal details are excluded.
+* Source explanations and generated signatures match the implementation.
+* Each new public API has the required `@since` information.
+* Generated reference uses established tooling and conventions.
+* Guides link to precise reference details without duplicating them.

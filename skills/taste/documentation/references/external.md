@@ -1,150 +1,39 @@
-# External Documentation
+# External documentation
 
-Use this reference when creating or modifying documentation intended for users of the project.
+Use this reference for documentation intended for users of the project, including READMEs, guides, CLI documentation, and interactive examples.
 
-## Audience
+## Organize around user tasks
 
-Write for someone who wants to **use the product**, not someone who wants to understand its implementation.
+Help readers understand what the product does, start using it, complete common tasks, discover important options, and troubleshoot failures. Do not assume familiarity with the source or internal architecture.
 
-The documentation should answer questions such as:
+Group information around goals and workflows. Do not mechanically create one page per source file, internal module, class, feature, or command. A separate page should help users find or complete something.
 
-* What is this?
-* Why would I use it?
-* How do I get started?
-* How do I accomplish common tasks?
-* What are the important options?
-* What should I do when something goes wrong?
-* Where can I find detailed reference information?
+Introduce a concept with a short explanation and a concrete example. Follow with important variations, then link to detailed reference as needed. Keep advanced functionality discoverable without forcing new users through it.
 
-Do not assume the reader is familiar with the source code or internal architecture.
+## Separate guides from reference
 
-## User-focused documentation
+Guides explain when a feature is useful and how to complete a task. Reference records exact syntax, supported values, constraints, and complete interfaces.
 
-Organize documentation around the user's goals and workflows rather than the structure of the implementation.
+Reference may be exhaustive; a getting-started guide should not be. Link to precise details rather than reproducing the full reference in conceptual pages.
 
-Do not mechanically create:
+For a programmatic API, use guides for realistic integration examples and generated reference for signatures, types, parameters, and overloads. See [API documentation](api.md) when working on that reference.
 
-* One page per source file
-* One page per internal module
-* One page per class
-* One page per feature simply because it exists
-* One page per command without considering how users actually discover and use it
+## Use practical examples
 
-Instead, group related functionality around meaningful user tasks.
+Prefer realistic, copyable examples that accomplish a task. Include the prerequisites or setup needed to make them work. Avoid examples designed only to demonstrate every option combination, and cut surrounding prose when the example already explains the behavior.
 
-## Progressive disclosure
+For a CLI, prioritize installation, common commands, important options, and troubleshooting. Group advanced flags in reference rather than filling the primary guide with every flag.
 
-Introduce complexity gradually.
+When the project provides a browser runner, playground, or terminal, make examples easy to transfer into it. Help readers understand an example, try it, modify it, and explore further. Documentation and the interactive tool should complement each other without duplicating the entire experience.
 
-Prefer:
+## Tone and review
 
-1. A short explanation
-2. A concrete example
-3. The most important options or variations
-4. Detailed reference information when necessary
+Use direct, practical language without marketing or unnecessary implementation details.
 
-A new user should be able to get started without reading the entire documentation.
+Apply the shared review in [SKILL.md](../SKILL.md), then read as a new user:
 
-Advanced functionality should be discoverable without overwhelming the primary learning path.
-
-## Examples
-
-Prefer realistic, copyable examples over lengthy explanations.
-
-Examples should demonstrate how users actually use the product.
-
-Do not create examples merely to demonstrate every possible option combination.
-
-When an example is sufficient to explain behavior, avoid surrounding it with unnecessary prose.
-
-## Reference vs guides
-
-Keep conceptual and task-oriented documentation separate from exhaustive reference material.
-
-### Guides
-
-Explain:
-
-* Why something is useful
-* When to use it
-* How to accomplish a task
-* Common workflows
-* Recommended approaches
-
-### Reference
-
-Explain:
-
-* Exact syntax
-* Available options
-* Supported values
-* Constraints
-* Complete public interfaces
-
-Reference material may be more comprehensive, but it should still be organized and readable.
-
-## CLI documentation
-
-For CLI projects, prioritize the user's workflow.
-
-The primary documentation should generally make it easy to:
-
-* Understand the CLI
-* Install or start using it
-* Run the most common commands
-* Understand important options
-* Discover advanced functionality
-* Troubleshoot common problems
-
-Do not turn the primary documentation into an exhaustive dump of every flag.
-
-If the CLI has many options, prioritize commonly used options and group advanced options appropriately.
-
-## Browser-based runners
-
-If the project provides a browser-based runner, playground, terminal, or similar interactive experience, treat it as part of the documentation experience.
-
-Documentation and the interactive tool should complement each other.
-
-Prefer a flow such as:
-
-**Understand → Try → Modify → Explore**
-
-Do not duplicate the interactive experience unnecessarily inside the documentation.
-
-Where appropriate, make examples easy to transfer into the interactive environment.
-
-## Programmatic APIs
-
-When documenting a programmatic API, distinguish between:
-
-**Conceptual documentation**
-
-Explains when and why a developer would use the API and provides useful examples.
-
-**API reference**
-
-Provides the complete public API surface, signatures, types, parameters, and other precise details.
-
-Do not copy the generated API reference into conceptual documentation.
-
-A conceptual page should link to the appropriate API reference when detailed information is needed.
-
-## Tone
-
-Explain what users need to know in direct, practical language, without marketing. The documentation should feel curated and intentional rather than automatically generated.
-
-## Quality bar
-
-Review the documentation as a new user.
-
-Ask:
-
-* Can I understand the product quickly?
-* Can I accomplish a common task without excessive reading?
-* Are the most important workflows easy to find?
-* Are examples realistic and useful?
-* Is advanced functionality appropriately separated?
-* Is anything primarily useful to maintainers rather than users?
-* Could any page be significantly shorter?
-* Is there duplicated information that belongs in a reference instead?
+* Can I understand the product and complete a common task without excessive reading?
+* Are useful workflows, troubleshooting, and advanced options easy to find?
+* Do examples work with the stated setup?
+* Is maintainer-only material in a more appropriate location?
+* Do guides link to reference rather than copy it?
