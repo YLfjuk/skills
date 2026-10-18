@@ -56,6 +56,18 @@ Do not treat any shortlist as exhaustive. Depending on what is stable and what v
 
 Patterns address different dimensions and may be combined. A facade can invoke a pipeline whose stages use injected adapters; a closed variant can select a strategy; a building block can accept an injected capability. Choose each pattern for a specific job, and avoid adding machinery just to make the design resemble a named pattern.
 
+### Preserve substitutability
+
+Apply the Liskov substitution principle, named after Barbara Liskov, wherever implementations promise the same contract. A caller using that contract should be able to switch implementations without breaking the behavior the contract guarantees.
+
+An implementation must not require stronger preconditions, provide weaker guarantees, or violate the contract's invariants. Matching method signatures is insufficient. This applies to interface implementations and injected capabilities as well as subclasses.
+
+For example, if `Storage` promises both reading and writing, a read-only implementation that rejects every write does not satisfy that contract. Split out the read capability and make callers request what they need.
+
+Litmus test: does a caller following the contract need to identify the implementation to use it correctly?
+
+### Choose who owns composition
+
 Two models deserve additional attention because they define where composition and concrete knowledge live:
 
 ### Inject capabilities
@@ -118,6 +130,7 @@ When designing or reviewing an abstraction:
 3. Ask whether leaving the code duplicated for now would be safer.
 4. Inspect the generic layer for knowledge of concrete cases.
 5. Check whether the public contract is smaller and more stable than its implementations.
-6. Prefer the smallest correction: wait, inline, split, narrow, inject, or expose a block.
+6. Check that every implementation preserves the promised behavior without requiring callers to identify it.
+7. Prefer the smallest correction: wait, inline, split, narrow, inject, or expose a block.
 
 Explain the tradeoff in concrete terms. Do not recommend abstraction or duplication as a universal virtue; recommend the choice whose likely cost is lowest when the next real case arrives.
