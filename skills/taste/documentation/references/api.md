@@ -10,11 +10,7 @@ Follow the project's boundaries, including public package exports, supported ent
 
 ## Source-level documentation
 
-For public APIs, describe the symbol's consumer contract. Add information the signature leaves unclear, such as constraints, errors, side effects, assumptions, and non-obvious semantics. The same content rule applies to internal doc comments.
-
-Source comments should supply useful explanations for developers and feed generated reference where applicable. Self-describing symbols need no explanatory prose, but required metadata still applies.
-
-Follow the code reference's comment-form, audience, and linking rules. Doc comments never reference repository notes or internal documentation. Any source documentation that reaches consumers must stand on its own and link only to public documentation for those readers.
+Use the [code documentation](code.md) rules for symbol contracts and the shared audience rules for links and internal context. Source comments also feed generated reference where applicable. Self-describing symbols need no explanatory prose, but required metadata still applies.
 
 ## `@since`
 

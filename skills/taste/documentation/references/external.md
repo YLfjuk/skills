@@ -1,6 +1,6 @@
 # External documentation
 
-Use this reference for documentation intended for users of the project, including READMEs, guides, CLI documentation, and interactive examples.
+Use this reference for documentation intended for users of the project, including READMEs, guides, release notes, CLI documentation, and interactive examples.
 
 ## Organize around user tasks
 
@@ -26,14 +26,25 @@ For a CLI, prioritize installation, common commands, important options, and trou
 
 When the project provides a browser runner, playground, or terminal, make examples easy to transfer into it. Help readers understand an example, try it, modify it, and explore further. Documentation and the interactive tool should complement each other without duplicating the entire experience.
 
+## Package release notes
+
+Check how the project's changelog tooling distributes each note. Do not assume package headings restrict which changelogs receive the body. If the tool sends the complete body to every package named in frontmatter, review that whole entry for each recipient.
+
+For each recipient, identify the consumer-visible change and check that the entire entry applies to that package's users. Split independent package-specific API, command, installation, or dependency changes. Keep shared compatibility requirements, producer/consumer contracts, and coordinated migrations together when the full explanation helps each audience. Mention another package only where it helps explain the recipient's change.
+
+Compare the note with the last published behavior and the package that owns the changed functionality at release time. Check both missing and excess attribution: affected packages need their changes documented, and every recipient needs an applicable entry. Shared version groups or dependency relationships alone do not establish relevance.
+
+When reviewing, report the concrete note and mismatched claims, with proposed package splits where needed.
+
 ## Tone and review
 
 Use direct, practical language without marketing or unnecessary implementation details.
 
-Apply the shared review in [SKILL.md](../SKILL.md), then read as a new user:
+Apply the shared review in [SKILL.md](../SKILL.md), then check the relevant document type:
 
-* Can I understand the product and complete a common task without excessive reading?
+* Can a guide's intended reader complete the task with the stated prerequisites?
 * Are useful workflows, troubleshooting, and advanced options easy to find?
 * Do examples work with the stated setup?
 * Is maintainer-only material in a more appropriate location?
 * Do guides link to reference rather than copy it?
+* Does each release-note recipient receive an applicable, complete account of its changes and required migration steps?

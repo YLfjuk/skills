@@ -20,11 +20,9 @@ Do not add comments that repeat names, types, obvious parameters or return value
 const user = getUserById(id);
 ```
 
-If code is unnecessarily hard to understand, consider improving it before explaining it with comments. This does not remove the need to document non-obvious constraints.
-
 ## Document symbols
 
-When writing a doc comment, describe the symbol's consumer contract: the behavior, guarantees, and constraints that code using it can rely on. Include purpose, errors, side effects, usage requirements, or non-obvious semantics where the signature leaves them unclear. Explain implementation details only when they affect that contract. Do not mechanically fill out every possible field.
+Describe the behavior, guarantees, and constraints that code using the symbol can rely on. Include errors, side effects, or usage requirements where the signature leaves them unclear. Explain implementation details only when they affect that contract. Do not mechanically fill out every possible field.
 
 A non-exported helper can still need a behavioral guarantee:
 
@@ -48,14 +46,12 @@ Comment workarounds, ordering requirements, compatibility constraints, unusual v
 // ordering within a connection.
 ```
 
-For external behavior, ask whether a competent reader who lacks that detail could break this code. If so, explain the consequence here. Otherwise, leave the language, runtime, or tool's explanation to its own documentation.
-
 ```ts
 // Wait for the resize to settle; the observer's first tick reports
 // the pre-layout box and would give us stale measurements.
 ```
 
-Do not turn a comment into an external technology's reference manual. Likewise, do not record development history such as "deferred to a later pass" or "revised from the earlier approach" beside code. Explain the current constraint. Mention a rejected alternative only when someone might plausibly retry it and needs to know the concrete failure or tradeoff.
+Explain the current constraint, rather than development history such as "deferred to a later pass" or "revised from the earlier approach".
 
 ### Configuration
 
@@ -67,19 +63,11 @@ Comment locally surprising choices or entries whose modification would break som
 // Listing plugins replaces the defaults; keep `react` listed so its rules still run.
 ```
 
-## Keep internal references out of doc comments
-
-Doc comments must not reference repository notes or internal documentation, even on internal symbols. This keeps the comment usable if the symbol later becomes public.
-
-A useful note reference belongs in a regular comment beside the code it explains, and only when consumer-facing tooling cannot expose it. Consumer visibility depends on actual IDE hovers, generated reference, declarations, or package output, not just comment syntax or export status.
-
-All consumer-visible comments must be self-contained and free of repository notes, private discussions, implementation plans, or maintainer-only terminology. Link only to public documentation for the same audience.
-
-Keep the essential local intent or constraint in a regular comment even when it links to a note. Do not add requirement IDs merely to label implementing code, or replace a redundant explanation with a bare pointer. The canonical requirement does not replace a necessary symbol contract or local warning.
-
 ## Place comments where they help
 
 Attach a doc comment directly to the public or internal symbol it describes. Put implementation rationale beside the line or block someone might change. Avoid distant comments that require searching to find their subject.
+
+Apply the shared audience rules to note links: use them only in regular comments that cannot reach consumers, and keep the essential constraint beside the code. Do not add requirement IDs merely to label implementing code or replace a needed explanation with a bare pointer.
 
 Default to no module header. A synopsis, ownership declaration, export inventory, or requirement pointer does not earn a header merely by being short.
 

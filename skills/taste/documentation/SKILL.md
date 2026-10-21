@@ -1,6 +1,6 @@
 ---
 name: documentation
-description: Write, review, and organize project documentation, including READMEs, user guides, code comments, TSDoc/JSDoc, and public API reference. Use when editing documentation or comments, reviewing a diff that touches them, or deciding what to document and where it belongs.
+description: Write, review, and organize project documentation, including READMEs, guides, release notes, code comments, TSDoc/JSDoc, and public API reference. Use when editing documentation or comments, reviewing a diff that touches them, or deciding what to document and where it belongs.
 ---
 
 # Documentation
@@ -13,7 +13,7 @@ Read only the references relevant to the task. Their scopes overlap when public 
 
 * [Code documentation](references/code.md): comments on public or internal symbols, implementation comments, configuration, and module headers.
 * [API documentation](references/api.md): supported public interfaces, generated reference, and required `@since` tags. For source comments, also read the code reference.
-* [External documentation](references/external.md): READMEs, guides, CLI documentation, examples, and interactive documentation.
+* [External documentation](references/external.md): READMEs, guides, release notes, CLI documentation, examples, and interactive documentation.
 
 ## Shared rules
 
@@ -23,7 +23,7 @@ Use the minimum explanation that preserves useful meaning. Describe consumer con
 
 If confusing code is the only reason a comment is needed, first consider clearer names, types, control flow, or structure. Keep warnings about non-obvious behavior even when the code is otherwise clear.
 
-### Keep a source of truth
+### Put information in its appropriate home
 
 Give each kind of information an appropriate home:
 
@@ -31,14 +31,19 @@ Give each kind of information an appropriate home:
 * Source comments explain symbol contracts and local implementation constraints.
 * Generated API reference exposes supported interfaces and precise signatures.
 * User guides teach tasks, concepts, and workflows.
+* Release notes explain changes and any action existing users need to take.
 
 Derive or link to canonical information where practical. These documents complement each other; a requirement does not replace a necessary API contract or local warning.
 
 Project requirements belong in the project's existing notes or specification area, such as `<root>/notes` when present. Do not scatter them through source comments or create a new notes structure merely to follow this skill.
 
+Explain decisions through project requirements, constraints, and consequences. Include private discussions or personal preferences only when the user requests that context and it suits the audience. Mention a rejected alternative only when its concrete tradeoff helps a current decision or prevents a plausible harmful change.
+
 ### Respect audience boundaries
 
 Decide who can encounter the text from the actual output. A comment may reach consumers through IDE hovers, generated reference, declaration files, or package tooling, even if its implementation looks internal.
+
+When one source feeds several outputs, check the complete text each audience receives. A heading or metadata label does not necessarily filter the content for that destination.
 
 Consumer-visible comments must stand on their own, avoid maintainer-only context, and link only to public documentation intended for those readers.
 
@@ -48,15 +53,9 @@ Doc comments must not reference repository notes or internal documentation, whet
 
 Ask who owns a fact and where someone would correct it. Language rules, tool behavior, project standards, and version history usually have a source elsewhere. Repeat only the detail needed to explain a local consequence; avoid copying their manuals or narrating past changes.
 
+Keep the essential explanation in the documentation itself. An external issue or discussion can support it, but should not be needed to understand the project's decision or constraint.
+
 A workaround or redundant-looking guard needs a comment when a reader could otherwise remove it and break the code. State what breaks and the external behavior responsible. This rule filters redundant explanations; it does not justify stripping necessary warnings.
-
-### Keep rationale grounded in the project
-
-Explain decisions through requirements, constraints, and consequences. Do not turn private discussions or personal preferences into project rationale unless the user requests that context and it suits the audience.
-
-Name another tool or a rejected alternative only when the comparison helps a current decision or prevents a plausible harmful change. Describe the concrete tradeoff without dismissing the alternative.
-
-Repository notes should record repository-owned facts and decisions. When external behavior matters, state that behavior and its local consequence directly. Do not rely on an external project's issue or discussion for the note's essential explanation.
 
 ### Follow conventions and keep facts current
 
@@ -73,4 +72,4 @@ Before finishing, check that:
 * Doc comments and consumer-visible text contain no internal references.
 * Rationale states project requirements and consequences rather than incidental author context.
 * Links, examples, signatures, and claims match current behavior.
-* The edit follows project conventions and can be shortened without losing needed information.
+* The edit follows project conventions and contains no unnecessary explanation.
