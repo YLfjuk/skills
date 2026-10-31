@@ -117,7 +117,7 @@ SomeComponent.tsx       ✗
 
 Framework- or tooling-required filenames (`vite.config.ts`, Next.js route files, etc.) follow that tool's convention instead — see `references/conventions.md`.
 
-**Don't repeat the folder name in the file name.** The folder is the context:
+**Don't repeat the folder name in the file name.** Avoid tautological names that repeat context the path already provides. In `users/user-service.ts`, `users/` already establishes the subject, so prefer `users/service.ts`. Keep a qualifier when it adds a meaningful distinction:
 
 ```text
 feature/component.tsx           ✓
