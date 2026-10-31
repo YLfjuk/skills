@@ -11,9 +11,7 @@ Choose by what the comment describes, not whether the symbol is exported:
 
 Internal functions, types, and constants may have doc comments under the same rules as public symbols. Their consumers are the code elsewhere in the repository that uses them.
 
-A symbol whose name and type already communicate its purpose and behavior needs no explanatory doc comment, exported or not. Required metadata tags, such as `@since` for a new public API, are a separate concern.
-
-Do not add comments that repeat names, types, obvious parameters or return values, or straightforward implementation. For example, this adds nothing:
+A symbol whose name and type already communicate its purpose and behavior needs no explanatory doc comment, exported or not. Required metadata tags, such as `@since` for a new public API, still apply. Regular comments should also add information beyond the code. For example, this adds nothing:
 
 ```ts
 // Get the user by ID
@@ -67,7 +65,7 @@ Comment locally surprising choices or entries whose modification would break som
 
 Attach a doc comment directly to the public or internal symbol it describes. Put implementation rationale beside the line or block someone might change. Avoid distant comments that require searching to find their subject.
 
-Apply the shared audience rules to note links: use them only in regular comments that cannot reach consumers, and keep the essential constraint beside the code. Do not add requirement IDs merely to label implementing code or replace a needed explanation with a bare pointer.
+Doc comments must not reference repository notes or internal documentation, whether the symbol is public or internal. Regular implementation comments may do so only when the reference cannot reach consumers. Keep the essential local constraint beside the code so it remains understandable without the link. Do not add requirement IDs merely to label implementing code.
 
 Default to no module header. A synopsis, ownership declaration, export inventory, or requirement pointer does not earn a header merely by being short.
 

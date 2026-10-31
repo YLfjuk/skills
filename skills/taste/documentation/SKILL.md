@@ -13,7 +13,7 @@ Read only the references relevant to the task. Their scopes overlap when public 
 
 * [Code documentation](references/code.md): comments on public or internal symbols, implementation comments, configuration, and module headers.
 * [API documentation](references/api.md): supported public interfaces, generated reference, and required `@since` tags. For source comments, also read the code reference.
-* [External documentation](references/external.md): READMEs, guides, release notes, CLI documentation, examples, and interactive documentation.
+* [External documentation](references/external.md): READMEs, guides, announcements, release notes, changelogs, CLI documentation, examples, and interactive documentation.
 
 ## Shared rules
 
@@ -25,17 +25,26 @@ If confusing code is the only reason a comment is needed, first consider clearer
 
 ### Put information in its appropriate home
 
-Give each kind of information an appropriate home:
+Choose by the reader's task and how the information will be maintained. Internal or external describes the audience; it does not determine whether the text belongs in a work record, maintained documentation, or a release communication.
 
-* Requirements and decision records define what the project must do and why.
-* Source comments explain symbol contracts and local implementation constraints.
-* Generated API reference exposes supported interfaces and precise signatures.
-* User guides teach tasks, concepts, and workflows.
-* Release notes explain changes and any action existing users need to take.
+| Destination | What belongs there |
+| --- | --- |
+| Issue | Problem or request, reproduction, scope, acceptance criteria, open questions, and work tracking. |
+| Pull or merge request | Proposed change and rationale, review context, validation results, comparison baselines, and rollout details for that change. |
+| Internal documentation | Architecture, operating procedures, project requirements, and decision records that maintainers need beyond a particular change. Preserve relevant constraints and tradeoffs. |
+| External documentation | Supported behavior, concepts, tasks, and troubleshooting that users need for the documented version. |
+| Source comments and API reference | Symbol contracts, local implementation constraints, and supported interfaces, close to the code or generated from it. |
+| Release notes | Changes in a release, their impact on existing users, and compatibility or migration actions. |
+| Changelog | A version-indexed record of changes, often assembled from release notes or changesets. Follow the project's format and generation process. |
+| Announcement | Selected news for a particular audience, why it matters, availability, and where to learn more or act. |
 
-Derive or link to canonical information where practical. These documents complement each other; a requirement does not replace a necessary API contract or local warning.
+These roles may share a file or publishing channel. A changeset is input to release tooling; write its published body for the audience of the resulting release note or changelog entry.
 
-Project requirements belong in the project's existing notes or specification area, such as `<root>/notes` when present. Do not scatter them through source comments or create a new notes structure merely to follow this skill.
+Keep work-specific investigation, reconciliation passes, and unreleased branch history in the issue or PR/MR. Carry conclusions needed for future use or maintenance into the appropriate documentation. Internal docs need that distinction too; they should not become a transcript of how the change was produced.
+
+Follow the project's existing source of truth. If an issue is the canonical requirement or decision record, link to it rather than creating a competing specification. Otherwise use the existing notes or specification area. Create a new structure only when the project needs one.
+
+Derive or link to canonical information where practical, while keeping each destination useful on its own. An issue or PR/MR link does not replace a necessary contract, local warning, or migration instruction. Writing one artifact does not require creating all the others.
 
 Explain decisions through project requirements, constraints, and consequences. Include private discussions or personal preferences only when the user requests that context and it suits the audience. Mention a rejected alternative only when its concrete tradeoff helps a current decision or prevents a plausible harmful change.
 
@@ -45,23 +54,21 @@ Decide who can encounter the text from the actual output. A comment may reach co
 
 When one source feeds several outputs, check the complete text each audience receives. A heading or metadata label does not necessarily filter the content for that destination.
 
-Consumer-visible comments must stand on their own, avoid maintainer-only context, and link only to public documentation intended for those readers.
+Consumer-facing text must stand on its own and link only to public documentation intended for those readers.
 
-Doc comments must not reference repository notes or internal documentation, whether the symbol is public or internal. Regular implementation comments may do so only when the reference cannot reach consumers. Include the essential local constraint beside the code so it remains understandable without the link.
+Write consumer-facing text around behavior, constraints, and actions the reader needs. Publicly accessible process context can still be irrelevant to the reader. Include history when it helps the reader use, understand, or migrate the product.
 
 ### Explain local consequences of external facts
 
-Ask who owns a fact and where someone would correct it. Language rules, tool behavior, project standards, and version history usually have a source elsewhere. Repeat only the detail needed to explain a local consequence; avoid copying their manuals or narrating past changes.
+Ask who owns a fact and where someone would correct it. For language rules, tool behavior, and other externally maintained facts, repeat only the detail needed to explain a local consequence.
 
 Keep the essential explanation in the documentation itself. An external issue or discussion can support it, but should not be needed to understand the project's decision or constraint.
-
-A workaround or redundant-looking guard needs a comment when a reader could otherwise remove it and break the code. State what breaks and the external behavior responsible. This rule filters redundant explanations; it does not justify stripping necessary warnings.
 
 ### Follow conventions and keep facts current
 
 Inspect nearby documentation for terminology, formatting, tag usage, and tooling. Reuse established patterns rather than introducing a competing style.
 
-Check documentation against the current implementation. Update affected explanations when behavior changes and remove obsolete comments or historical rationale that no longer applies.
+Check claims against the implementation or release the text describes. Update maintained documentation when behavior changes. Preserve accurate historical release entries and announcements; correct errors without rewriting them to describe today's behavior.
 
 ## Review
 
@@ -69,7 +76,7 @@ Before finishing, check that:
 
 * The text adds useful information for its audience and sits where readers need it.
 * Contracts and local warnings remain clear without duplicating specifications or reference manuals.
-* Doc comments and consumer-visible text contain no internal references.
-* Rationale states project requirements and consequences rather than incidental author context.
-* Links, examples, signatures, and claims match current behavior.
+* Links and context suit every audience that receives the text.
+* Lasting contracts and decisions are documented where future readers need them; work-specific process context stays in the issue or PR/MR.
+* Links, examples, signatures, and claims match the documented version or release.
 * The edit follows project conventions and contains no unnecessary explanation.

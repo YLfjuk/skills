@@ -2,15 +2,13 @@
 
 Use this reference for supported public programmatic interfaces and their generated reference. For doc comments on public or internal symbols, also read [code documentation](code.md).
 
+For usage guides and examples, read [external documentation](external.md).
+
 ## Define the supported API
 
 Only intentionally supported interfaces belong in the public API reference. A technical export alone does not establish support.
 
 Follow the project's boundaries, including public package exports, supported entry points, public types, and documented extension points. Exclude internal implementation details.
-
-## Source-level documentation
-
-Use the [code documentation](code.md) rules for symbol contracts and the shared audience rules for links and internal context. Source comments also feed generated reference where applicable. Self-describing symbols need no explanatory prose, but required metadata still applies.
 
 ## `@since`
 
@@ -30,12 +28,6 @@ Prefer generating reference from source documentation and type information using
 
 The reference should be comprehensive and navigable across supported functions, classes, types, interfaces, enums, constants, and configuration objects. Preserve accurate signatures, parameters, return types, generics, and relevant overloads. Exclude private and internal details.
 
-## Guides and examples
-
-A guide explains when and why to use an API and demonstrates a realistic task. Link to the reference for full signatures, options, and overloads instead of reproducing them.
-
-Include examples when they clarify meaningful usage. Do not create examples solely to exercise every type or overload. Simple APIs may need little beyond their source documentation.
-
 ## Review
 
 Apply the shared review in [SKILL.md](../SKILL.md), then check:
@@ -44,4 +36,3 @@ Apply the shared review in [SKILL.md](../SKILL.md), then check:
 * Source explanations and generated signatures match the implementation.
 * Each new public API has the required `@since` information.
 * Generated reference uses established tooling and conventions.
-* Guides link to precise reference details without duplicating them.
