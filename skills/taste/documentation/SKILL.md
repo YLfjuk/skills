@@ -1,6 +1,6 @@
 ---
 name: documentation
-description: Write, review, and organize project documentation, including READMEs, guides, release notes, code comments, TSDoc/JSDoc, and public API reference. Use when editing documentation or comments, reviewing a diff that touches them, or deciding what to document and where it belongs.
+description: Write, review, and organize project documentation, including READMEs, guides, product comparisons, release notes, code comments, TSDoc/JSDoc, and public API reference. Use when editing documentation or comments, writing comparison content, reviewing a diff that touches them, or deciding what to document and where it belongs.
 ---
 
 # Documentation
@@ -14,6 +14,7 @@ Read only the references relevant to the task. Their scopes overlap when public 
 * [Code documentation](references/code.md): comments on public or internal symbols, implementation comments, configuration, and module headers.
 * [API documentation](references/api.md): supported public interfaces, generated reference, and required `@since` tags. For source comments, also read the code reference.
 * [External documentation](references/external.md): READMEs, guides, announcements, release notes, changelogs, CLI documentation, examples, and interactive documentation.
+* [Comparison content](references/comparison-content.md): product or tool comparisons, "X vs Y" pages, alternatives, and "best tools" roundups. Use for comparisons that help readers choose, not ordinary before/after release descriptions.
 
 ## Shared rules
 
