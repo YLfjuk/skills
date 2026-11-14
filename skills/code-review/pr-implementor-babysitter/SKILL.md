@@ -1,11 +1,11 @@
 ---
 name: pr-implementor-babysitter
-description: Follow a pull or merge request after creating it, respond to review comments, and fix accepted feedback. Use when acting as the change author, not the reviewer.
+description: Follow code reviews of authored changes, respond to review comments, and fix accepted feedback. Use when acting as the change author, not the reviewer.
 ---
 
-# PR implementor babysitter
+# Implementor babysitter
 
-Start after creating the PR or MR. Set up a monitor for its review comments and requested changes until it closes, merges, or the user ends the assignment. The skill defines what to do when invoked; it does not keep an agent running. Use the available host and scheduler capabilities: prefer an event trigger for review activity, then a scheduled check if event triggers are unavailable. If neither is available, tell the user that follow-up requires a new invocation. On each wake-up, fetch the current request state and act only on new, relevant feedback.
+Start after creating the review request on the host. Set up a monitor for review comments and requested changes until it closes, merges, or the user ends the assignment. The skill defines what to do when invoked; it does not keep an agent running. Use the available host and scheduler capabilities: prefer an event trigger for review activity, then a scheduled check if event triggers are unavailable. If neither is available, tell the user that follow-up requires a new invocation. On each wake-up, fetch the current request state and act only on new, relevant feedback.
 
 Keep a durable per-request checkpoint with processed comment and review IDs and the last handled head commit. If a reliable checkpoint is unavailable, reconstruct what has already been handled from the request history. Ignore the agent's own comments so a reply does not trigger another reply.
 

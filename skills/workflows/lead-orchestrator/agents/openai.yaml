@@ -1,0 +1,6 @@
+interface:
+  display_name: "Lead orchestrator"
+  short_description: "Coordinate implementation and review teams"
+  default_prompt: "Use $lead-orchestrator to coordinate implementation and review of these changes."
+policy:
+  allow_implicit_invocation: false
