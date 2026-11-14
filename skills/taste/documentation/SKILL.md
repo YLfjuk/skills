@@ -22,6 +22,8 @@ Read only the references relevant to the task. Their scopes overlap when public 
 
 Use the minimum explanation that preserves useful meaning. Describe consumer contracts for symbols, and reasons or failure consequences for maintainers. A symbol's consumers include code that uses it within the repository. Explain implementation mechanics only when they matter to usage or safe changes.
 
+Avoid tautological explanations that restate a name, type, nearby code, or an earlier sentence without adding meaning. Judge redundancy against what the intended reader can see and reasonably understand. API reference and external docs may need a plain-language summary or a brief restatement to stand alone, teach an unfamiliar concept, or emphasize a consequential constraint. Keep repetition when it serves that purpose, rather than adding prose for completeness.
+
 If confusing code is the only reason a comment is needed, first consider clearer names, types, control flow, or structure. Keep warnings about non-obvious behavior even when the code is otherwise clear.
 
 ### Put information in its appropriate home
