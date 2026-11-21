@@ -1,6 +1,6 @@
 ---
 name: abstraction-boundaries
-description: Design and review code abstractions without premature generalization, leaky boundaries, or special-case-heavy generic layers. Use when extracting shared code, introducing interfaces or generic parameters, designing reusable APIs or plugin systems, or reviewing an abstraction whose concrete assumptions may be leaking through.
+description: Design and review code abstractions without premature generalization, leaky boundaries, or special-case-heavy generic layers. Use when extracting shared code, introducing interfaces or generic parameters, designing reusable APIs or plugin systems, deciding responsibility ownership across boundaries, or reviewing an abstraction whose concrete assumptions may be leaking through.
 ---
 
 # Abstraction Boundaries
@@ -36,7 +36,7 @@ This is the key distinction:
 - **Same implementation:** the code happens to look alike now.
 - **Same responsibility:** the behavior represents one rule and should change together.
 
-Extract shared code for the second. Treat the first only as a signal worth investigating.
+Extract shared code for the second. Treat the first only as a signal worth investigating. Apply the same test to external libraries and shared utilities: do not adopt a dependency whose contract only superficially resembles what you need when your domain relies on different guarantees or shapes.
 
 ## Then choose the boundary
 
@@ -44,7 +44,7 @@ Use the smallest boundary that represents the observed variation. Common forms i
 
 Do not treat any shortlist as exhaustive. Depending on what is stable and what varies, useful choices may include:
 
-- A discriminated union or sum type for a closed set of known variants.
+- A discriminated union or sum type for a closed set of known variants or caller-actionable failure modes.
 - A strategy or callback when one operation varies inside a stable flow.
 - An adapter when two independently owned models need translation.
 - A facade when callers need a simpler view of a complex subsystem, without implying substitutable implementations.
@@ -66,11 +66,17 @@ For example, if `Storage` promises both reading and writing, a read-only impleme
 
 Litmus test: does a caller following the contract need to identify the implementation to use it correctly?
 
+### Keep responsibilities distinct
+
+Give each boundary a clear, narrow job. When a model or module represents one concern, do not absorb adjacent responsibilities—such as execution, orchestration, or presentation—into it merely because callers often use them together.
+
+Avoid pushing choices or metadata down into lower-level inputs just because a later step will need them. Pass or combine stage-specific data at the boundary that owns that step.
+
 ### Choose who owns composition
 
-Two models deserve additional attention because they define where composition and concrete knowledge live:
+Two models deserve additional attention because they define where composition and concrete knowledge live. They are not mutually exclusive—you can inject a varying capability into a composable block, or build a composed feature from independently useful pieces—and other boundaries may fit better:
 
-### Inject capabilities
+#### Inject capabilities
 
 Use dependency injection when core behavior is stable but a capability or implementation varies—for example storage, time, randomness, transport, or a backend.
 
@@ -81,7 +87,7 @@ Use dependency injection when core behavior is stable but a capability or implem
 
 Litmus test: can the core be understood and tested using only the declared contract, without knowing which concrete implementation production selects?
 
-### Expose building blocks
+#### Expose building blocks
 
 Use composable building blocks when consumers need to assemble or adapt small pieces themselves—for example UI primitives, utilities, parsers, and workflow steps.
 
@@ -91,8 +97,6 @@ Use composable building blocks when consumers need to assemble or adapt small pi
 - If blocks require one another in a prescribed arrangement, describe the result honestly as a framework or composed API.
 
 Litmus test: can a consumer take one block alone, use it directly, and replace or extend it without understanding unrelated blocks?
-
-These models can coexist: inject a varying capability into a block, or build a composed feature from independently useful pieces. Other boundaries may fit better; do not force either model onto every abstraction.
 
 ## Prevent collapsed genericism
 
@@ -105,7 +109,10 @@ When this happens, find the missing distinction and choose the smallest honest r
 - Split cases whose behavior or reasons to change are materially different.
 - De-generalize the code when there is only one meaningful case.
 
-Do not preserve a false abstraction merely because callers already depend on it.
+Weigh boundary visibility and caller ownership when changing or removing an abstraction:
+
+- **Internal seams** (unexported or repo-private boundaries whose callers are all in-repo and directly inspectable) are cheap to inline, narrow, or reshape. Do not preserve a false internal abstraction or add compatibility shims for hypothetical callers, and verify actual call sites before calling a change breaking.
+- **Public or cross-boundary contracts** (published, external, or independently versioned—even when some callers live in-repo) carry real migration cost. Keep their surface small and stable, and weigh caller impact before reshaping an established contract that already serves callers well—fix real leakage, ambiguity, or defects rather than churning for cosmetics, and prefer additive repairs (such as introducing a narrower capability the existing contract extends) over breaking established callers.
 
 ## Warning signs
 
@@ -114,6 +121,7 @@ Do not preserve a false abstraction merely because callers already depend on it.
 - A base class offers hooks mainly so subclasses can undo its assumptions.
 - Options and generic parameters grow with every new consumer.
 - Context or configuration travels through layers that neither own nor use it.
+- A model or module absorbs adjacent responsibilities, or carries data and choices that belong to another stage or boundary.
 - Consumers must understand implementation details to use the public contract safely.
 - Changes to one case repeatedly require edits to unrelated cases.
 - A shared helper has a vague name because the cases share syntax but not meaning.
@@ -125,12 +133,12 @@ One implementation is not automatically a problem: an interface can still enforc
 
 When designing or reviewing an abstraction:
 
-1. Name the existing concrete cases and the evidence that they are one concept, not merely similar code.
+1. Name the existing concrete cases—or the boundary's concrete job (such as isolating an external system or test seam)—and, when unifying cases, the evidence that they are one concept rather than merely similar code.
 2. State what is stable, what varies, who owns each side of the boundary, and whether the cases should change together.
 3. Ask whether leaving the code duplicated for now would be safer.
-4. Inspect the generic layer for knowledge of concrete cases.
-5. Check whether the public contract is smaller and more stable than its implementations.
+4. Inspect the generic layer for knowledge of concrete cases, and check whether any boundary has absorbed responsibilities or state that belong to another stage.
+5. Check whether the contract is smaller and more stable than its implementations, and verify boundary visibility—checking actual call sites for internal seams, while recognizing that changing published guarantees can break external callers you cannot inspect.
 6. Check that every implementation preserves the promised behavior without requiring callers to identify it.
-7. Prefer the smallest correction: wait, inline, split, narrow, inject, or expose a block.
+7. Prefer the smallest correction: wait, inline, split, narrow, inject, adapt, or expose a block.
 
 Explain the tradeoff in concrete terms. Do not recommend abstraction or duplication as a universal virtue; recommend the choice whose likely cost is lowest when the next real case arrives.
