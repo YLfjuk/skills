@@ -76,6 +76,27 @@ controllers/users.controller.ts ✓  NestJS convention
 
 ---
 
+## Kind-named folders
+
+`constants/`, `utils/`, `types/`, `enums/`, `schemas/`, `mappers/`, `helpers/`, `components/`, `services/` all follow one shape:
+
+```text
+{kind}/{name}.ts        enums/status.ts, schemas/user.ts, mappers/color-by-status.ts
+```
+
+Plural folder, singular file, **no kind suffix** — the folder is the context. The exception is a suffix an external convention already establishes (see [Naming](#naming)).
+
+These are technical subdirectories, **not layers**. They appear at whatever layer owns the code — `core/utils/`, `foundation/breadcrumbs/types/`, `features/users/enums/`. Placement follows the narrowest-owner rule from SKILL.md; the folder name says what kind of thing it is, not where it belongs.
+
+**One file or a folder?** The cohesive-file rule decides it, and the answer differs by kind for a reason:
+
+- Things that **compose** can share a file. Field schemas built up into a larger schema are one concept, so `schemas.ts` is valid and promotes to `schemas/` when distinct schemas become independently meaningful. Same for `constants.ts` and `utils.ts`.
+- Things that **don't compose** get one per file. Two unrelated enums in `enums.ts` are just two unrelated things sharing a file, so enums go straight to `enums/{name}.ts` from the first one.
+
+Subset enums spread into a parent are the composing case, so they belong in one file together.
+
+---
+
 ## Configs
 
 ```text
@@ -114,25 +135,6 @@ Config files define configuration, not unrelated application logic.
 Use `satisfies` when a config object must conform to a definite shape without losing its inferred type.
 
 ---
-
-## Kind-named folders
-
-`constants/`, `utils/`, `types/`, `enums/`, `schemas/`, `mappers/`, `helpers/`, `components/`, `services/` all follow one shape:
-
-```text
-{kind}/{name}.ts        enums/status.ts, schemas/user.ts, mappers/color-by-status.ts
-```
-
-Plural folder, singular file, **no kind suffix** — the folder is the context. The exception is a suffix an external convention already establishes (see [Naming](#naming)).
-
-These are technical subdirectories, **not layers**. They appear at whatever layer owns the code — `core/utils/`, `foundation/breadcrumbs/types/`, `features/users/enums/`. Placement follows the narrowest-owner rule from SKILL.md; the folder name says what kind of thing it is, not where it belongs.
-
-**One file or a folder?** The cohesive-file rule decides it, and the answer differs by kind for a reason:
-
-- Things that **compose** can share a file. Field schemas built up into a larger schema are one concept, so `schemas.ts` is valid and promotes to `schemas/` when distinct schemas become independently meaningful. Same for `constants.ts` and `utils.ts`.
-- Things that **don't compose** get one per file. Two unrelated enums in `enums.ts` are just two unrelated things sharing a file, so enums go straight to `enums/{name}.ts` from the first one.
-
-Subset enums spread into a parent are the composing case, so they belong in one file together.
 
 ## Constants
 
@@ -194,7 +196,7 @@ Tests follow the ownership of the code they test. Tests for reusable package fun
 **Two layouts are equally acceptable.** Colocated beside the code:
 
 ```text
-features/users/users.test.ts
+features/users/service.test.ts
 ```
 
 or a `test/` sibling of `src/` at the package root:
@@ -209,7 +211,7 @@ packages/core/
 
 Neither is the default. Pick one per package and stay consistent within it — mixing both in one package is the thing to avoid.
 
-**Test helpers live with the tests, not in `src/`.** A fake, fixture, or builder used only by tests is test infrastructure; putting it in `src/` ships it to consumers.
+**Test helpers live with the tests, not in shipped source.** A fake, fixture, or builder used only by tests is test infrastructure; putting it in `src/` can include it in published output. Keep helpers under `test/`, or — with colocated tests — in a dedicated test-helper path or pattern excluded from build and publish output.
 
 ```text
 packages/core/test/fake-registry.ts    ✓

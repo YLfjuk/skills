@@ -17,7 +17,7 @@ This guide is the default for greenfield code, and for anything no other standar
 
 This codebase organizes code by **conceptual responsibility**, not by technical category. The directory a file sits in is a consequence of what the code is responsible for and what concepts it needs to know about.
 
-Two things follow from that, and they matter more than any individual rule below:
+Three things follow from that, and they matter more than any individual rule below:
 
 - **Do not create a layer because a kind of code exists.** The right structure is the smallest one that gives useful separation of responsibilities and dependency boundaries. A small frontend may only need `features/`, `pages/`, `routes/`.
 - **Each app type brings its own composition layers.** A frontend app composes through `layouts`, `pages`, `routes`; a backend app through `controllers`, `middlewares`, `routes`. Neither set is the default — they're peer instantiations of the same application-composition responsibility, and a different kind of app (CLI, worker, job runner) introduces its own.
@@ -46,7 +46,7 @@ What that means in practice:
 - Application source lives in `apps/{app}/`, never at the repo root.
 - Cross-package imports go through the package name (`@scope/package`), never a relative path that climbs out of one workspace into another.
 
-That last point is what makes the boundary rules enforceable rather than aspirational: the module resolver, not a convention, is what stops a consumer from reaching into another package's internals.
+Combined with explicit package `exports`, that is what makes the boundary rules enforceable rather than aspirational: the module resolver, not just a convention, stops a consumer from reaching into another package's internals.
 
 The distinction, when both are present: `apps/` holds deployables, `packages/` holds publishables and shared code. Adding the other root later requires no restructuring, since the shape is already correct.
 
@@ -100,7 +100,7 @@ frontend:  domains → layouts → pages → routes
 backend:   domains → controllers / middlewares → routes
 ```
 
-More-specific code may depend on less-specific code where it actually needs to. The reverse is the error to watch for: `core/utils → features/users` makes generic code aware of a specific capability. A feature must not depend on a domain that consumes it.
+More-specific code may depend on less-specific code where it actually needs to. The reverse is the error to watch for: `core/utils` importing `features/users` makes generic code aware of a specific capability (type-only imports count too). A feature must not depend on a domain that consumes it.
 
 This is a direction, not a chain — no layer is required to depend on the one immediately before it. `ui`, `design`, and `lib` in particular don't sit in a strict line with the rest; place them by their actual dependencies.
 
@@ -117,7 +117,7 @@ SomeComponent.tsx       ✗
 
 Framework- or tooling-required filenames (`vite.config.ts`, Next.js route files, etc.) follow that tool's convention instead — see `references/conventions.md`.
 
-**Don't repeat the folder name in the file name.** Avoid tautological names that repeat context the path already provides. In `users/user-service.ts`, `users/` already establishes the subject, so prefer `users/service.ts`. Keep a qualifier when it adds a meaningful distinction:
+**Don't repeat the folder name in the file name.** Avoid tautological names that repeat context any enclosing folder already provides. In `users/user-service.ts`, `users/` already establishes the subject, so prefer `users/service.ts` (and `users/services/profile.ts` rather than `users/services/user-profile-service.ts`). Keep a qualifier when it adds a meaningful distinction:
 
 ```text
 feature/component.tsx           ✓
@@ -127,11 +127,11 @@ feature/feature-component.tsx   ✗
 **Within a unit, import directly. Don't route through a barrel:**
 
 ```ts
-import { X } from './X';   ✓
+import { X } from './x';   ✓
 import { X } from '.';      ✗
 ```
 
-**Barrels belong at the root of a conceptual unit, and nowhere else.** A feature, foundation block, lib integration, or domain has an `index.ts` at its own root defining its public API:
+**Barrels belong at the root of a multi-file conceptual unit, and nowhere else.** A small single-file unit (`features/billing.ts`) is already its own entry point; once a feature, foundation block, lib integration, or domain grows into a directory, give it an `index.ts` at its own root defining its public API:
 
 ```text
 features/users/index.ts        ✓  entry point for the feature
@@ -139,7 +139,7 @@ features/users/utils/index.ts  ✗  internal subdirectory
 features/users/types/index.ts  ✗  internal subdirectory
 ```
 
-Create it with the unit. The unit exists because something consumes it — that's what justified extracting it in the first place — so it needs an interface from the start. Without one, consumers reach into internals (`features/users/components/user-list`) and the boundary stops meaning anything.
+Create it with the directory. The unit exists because something consumes it — that's what justified extracting it in the first place — so once it has internal files it needs an interface from the start. Without one, consumers reach into internals (`features/users/components/list`) and the boundary stops meaning anything.
 
 The "does this have a consumer?" test applies to **creating the unit**, not to giving it a barrel. If nothing consumes it yet, the code should still be colocated with its owner rather than sitting in a feature of its own.
 
@@ -147,12 +147,12 @@ Curate what the barrel exports. It's a public API, not a re-export of everything
 
 ```ts
 export type * from "./types";
-export { createUserService } from "./services/create-user-service";
+export { ProfileService } from "./services/profile";
 ```
 
-What "don't abuse them" rules out: an `index.ts` in every subdirectory, barrels that re-export a unit's entire contents, and routing an import through a barrel when a direct path is available.
+What "don't abuse them" rules out: an `index.ts` in every subdirectory, barrels that blindly re-export a unit's internal files (re-exporting an already-curated barrel, exporting everything that genuinely belongs in the public API, or exposing an intentional `export * as` namespace is fine), and routing a same-unit import through its own barrel.
 
-**`core` and `ui` get no barrel.** Neither is a cohesive unit with a public API — `core` is a collection of unrelated primitives, and `ui` mirrors whatever the generator emitted. Import from them directly:
+**`core` and `ui` get no barrel.** Neither is a cohesive unit with a public API — `core` is a collection of unrelated primitives, and `ui` mirrors whatever the generator emitted. Import from them directly — via declared subpath exports when they live in a package, never by reaching into `/src/` internals:
 
 ```ts
 import { isDefined } from '@scope/core/utils/is-defined';   ✓
@@ -178,7 +178,7 @@ export * from './types';         ✗  (for type-only modules)
 
 **Package names follow `@{scope}/{name}`** or `@{scope}/{sub-purpose}.{name}` — e.g. `@scope/web`, `@scope/feature-react`, `@scope/tests.utils`.
 
-**File-based routing assigns an entry point, not all frontend responsibilities.** Keep the framework-required route module where the framework expects it and let it own routing concerns: route configuration, loading and validation, redirects, guards, and route-specific orchestration. Pages own a screen's general structure and compose its features, domains, and layouts, much as controllers compose application capabilities into a response. Extract when that division gives the screen a clear owner; do not add a page merely to wrap a trivial route, or override an established framework or repository convention that deliberately combines them.
+**File-based routing assigns an entry point, not all frontend responsibilities.** Keep the framework-required route module where the framework expects it and let it own routing concerns: route configuration, loading and route-input validation, redirects, guards, and route-specific orchestration. Pages own a screen's general structure and compose its features, domains, and layouts, much as controllers compose application capabilities into a response. Extract when that division gives the screen a clear owner; do not add a page merely to wrap a trivial route, or override an established framework or repository convention that deliberately combines them.
 
 ## Files, configs, constants, utilities
 
@@ -202,5 +202,6 @@ This guide is deliberately permissive about structure — layers can be omitted,
 
 - Prefer the narrower scope. Colocated code that later needs promoting is a cheaper mistake than shared code that shouldn't be.
 - Say which call you made and why, rather than picking silently. Placement decisions are the reviewable part of the work.
+- When reviewing structure, distinguish hard violations (reverse dependency direction, reaching into another unit's or package's internals, breaking established repo or framework standards, or violating the explicit non-judgment-call rules above in greenfield code) from advisory layout preferences where multiple placements are reasonable. Suggest preferences without blocking on them.
 
 Matching the surrounding code isn't a tiebreaker for ambiguous cases — it's the precedence rule at the top of this file, and it applies whether or not the guide is clear.

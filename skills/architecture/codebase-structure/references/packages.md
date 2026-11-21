@@ -8,6 +8,7 @@
 - [Public APIs](#public-apis)
 - [Submodules](#submodules)
 - [Naming](#naming)
+- [Promotion path](#promotion-path)
 
 ---
 
@@ -100,7 +101,7 @@ packages/users/src/
 
 ```ts
 export type * from "./types";
-export { createUserService } from "./services/create-user-service";
+export { ProfileService } from "./services/profile";
 ```
 
 Internal modules are not public merely because they're physically reachable. Consumers use the supported entry point:
@@ -137,7 +138,7 @@ Do not force optional or framework-specific code into the primary entry point �
 
 ### Entry points are public surfaces, not implementation layers
 
-`.` and a submodule entry point such as `./node` define what consumers can import. They may re-export a curated API or perform only the minimal composition needed needed to expose it; they do not become a general home for modules merely because those modules share an export path.
+`.` and a submodule entry point such as `./node` define what consumers can import. They may re-export a curated API or perform only the minimal composition needed to expose it; they do not become a general home for modules merely because those modules share an export path.
 
 Put implementation with the feature, domain, or other unit that owns it. Subexports and layers are separate dimensions: a subexport may expose a domain, a feature, or a curated API spanning several units. A domain will often have a corresponding subexport because its boundary is independently useful to consumers, but neither the import path nor the layer determines the other. Keep the public path stable while organizing implementation by ownership.
 
@@ -173,7 +174,7 @@ Code should begin at the narrowest reasonable scope and move outward only for a 
 ```text
 core/components/breadcrumb.tsx
   → foundation/breadcrumbs/{component.tsx,types.ts,utils.ts}    # grew into an app-level block
-  → packages/users/                                              # needed by multiple apps
+  → packages/breadcrumbs/                                       # needed by multiple apps (or packages/design/src/features/breadcrumbs/ in a shared UI package)
 ```
 
 Each step should be triggered by something real — genuine reuse, a clearer owner, dependency isolation, independent distribution, encapsulation, a meaningful boundary. Not by anticipation.

@@ -232,7 +232,7 @@ pages/
   dashboard/
 ```
 
-**Routes** — own routing logic: route definitions, loading and validation, redirects, guards, and route-specific orchestration. In file-based routing, they also contain the framework-required entry module. That convention does not make the route module the default owner of a screen's general structure or composition.
+**Routes** — own routing logic: route definitions, loading and route-input validation, redirects, guards, and route-specific orchestration. In file-based routing, they also contain the framework-required entry module. That convention does not make the route module the default owner of a screen's general structure or composition.
 
 Keep a trivial route module intact when extracting a page would add indirection without a boundary. When the screen's structure or composition becomes substantial, put it in `pages/` and let the route handle the routing work around it. Follow a framework or repository convention that deliberately combines the two.
 
