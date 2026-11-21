@@ -14,7 +14,9 @@ Follow the project's boundaries, including public package exports, supported ent
 
 Every newly introduced public API must include a `@since` tag for its release version. Follow the project's versioning and tag-format conventions.
 
-If the future version is not yet known, use:
+Unless the project's convention or tooling requires otherwise, place `@since` on newly introduced top-level public symbols rather than repeating it on every property or member shipped in that symbol's first published release; add member- or property-level `@since` tags only when adding a new field, option, method, or overload to an already-published public API.
+
+If the future version is not yet known and the project has no other placeholder convention, use:
 
 ```ts
 /** @since @next */

@@ -22,7 +22,7 @@ Read only the references relevant to the task. Their scopes overlap when public 
 
 Use the minimum explanation that preserves useful meaning. Describe consumer contracts for symbols, and reasons or failure consequences for maintainers. A symbol's consumers include code that uses it within the repository. Explain implementation mechanics only when they matter to usage or safe changes.
 
-Avoid tautological explanations that restate a name, type, nearby code, or an earlier sentence without adding meaning. Judge redundancy against what the intended reader can see and reasonably understand. API reference and external docs may need a plain-language summary or a brief restatement to stand alone, teach an unfamiliar concept, or emphasize a consequential constraint. Keep repetition when it serves that purpose, rather than adding prose for completeness.
+Avoid tautological explanations that restate a name, signature, type, nearby code, or an earlier sentence without adding meaning. Do not narrate control flow or logic branches step by step, translate types into prose, or pad documentation with excessive detail—such as internal mechanics, unrequested background, or repetitive boilerplate—that obscures what the reader needs. Judge redundancy against what the intended reader can see and reasonably understand. API reference and external docs may need a plain-language summary or a brief restatement to stand alone, teach an unfamiliar concept, or emphasize a consequential constraint. Keep repetition when it serves that purpose, rather than adding prose for completeness.
 
 If confusing code is the only reason a comment is needed, first consider clearer names, types, control flow, or structure. Keep warnings about non-obvious behavior even when the code is otherwise clear.
 
@@ -44,6 +44,10 @@ Choose by the reader's task and how the information will be maintained. Internal
 These roles may share a file or publishing channel. A changeset is input to release tooling; write its published body for the audience of the resulting release note or changelog entry.
 
 Keep work-specific investigation, reconciliation passes, and unreleased branch history in the issue or PR/MR. Carry conclusions needed for future use or maintenance into the appropriate documentation. Internal docs need that distinction too; they should not become a transcript of how the change was produced.
+
+When a repository separates `docs/` from `notes/` (or an equivalent internal-notes area), split maintained documentation (external or internal) from working notes:
+* **`docs/`** holds curated, maintained documentation—external or internal (user-facing guides, reference, or maintained maintainer and architecture docs)—kept current with the codebase.
+* **`notes/`** holds working maintainer records—design proposals, planning docs, research, and scoped specifications—not an unstructured dumping ground. Give each note a clear purpose and scope, keep raw scratchpads, session transcripts, and PR play-by-plays out of `notes/`, and keep notes self-contained and local to the repository rather than acting as thin proxies to external trackers. Prefer updating or consolidating an existing note over creating overlapping files. Once work lands, graduate lasting contracts, architecture, and operating guidance into maintained docs or code comments and prune or mark superseded plans so stale notes do not read like current truth.
 
 Follow the project's existing source of truth. If an issue is the canonical requirement or decision record, link to it rather than creating a competing specification. Otherwise use the existing notes or specification area. Create a new structure only when the project needs one.
 
@@ -80,6 +84,6 @@ Before finishing, check that:
 * The text adds useful information for its audience and sits where readers need it.
 * Contracts and local warnings remain clear without duplicating specifications or reference manuals.
 * Links and context suit every audience that receives the text.
-* Lasting contracts and decisions are documented where future readers need them; work-specific process context stays in the issue or PR/MR.
+* Lasting contracts and decisions are documented where future readers need them; work-specific process context stays in the issue or PR/MR, and internal notes remain scoped and current rather than accumulating scratch material.
 * Links, examples, signatures, and claims match the documented version or release.
 * The edit follows project conventions and contains no unnecessary explanation.

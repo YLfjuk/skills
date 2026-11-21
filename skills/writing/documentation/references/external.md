@@ -4,7 +4,7 @@ Use this reference for user-facing documentation and communication, including RE
 
 ## Organize around user tasks
 
-Help readers understand what the product does, start using it, complete common tasks, discover important options, and troubleshoot failures. Do not assume familiarity with the source or internal architecture.
+Help readers understand what the product does, start using it, complete common tasks, discover important options, and troubleshoot failures. Do not assume familiarity with the source or internal architecture. Keep READMEs and guides focused on what consumers need for the current release—trim internal mechanics, contributor-only tooling details, and roadmap or target-version boilerplate.
 
 Group information around goals and workflows. Do not mechanically create one page per source file, internal module, class, feature, or command. A separate page should help users find or complete something.
 
@@ -34,9 +34,11 @@ Write for the channel and occasion. An announcement can introduce an upcoming fe
 
 ## Release notes and changelogs
 
-Release notes explain the impact of a release; a changelog retains changes by version. Projects may publish the same text in both. A changeset's body should be ready for its eventual published destination, with package and version metadata handled by the project's tooling.
+Release notes explain the impact of a release; a changelog retains changes by version. Projects may publish the same text in both. A changeset's body should be ready for its eventual published destination, with package and version metadata handled by the project's tooling. Omit internal-only changes with no consumer-visible impact from public release notes and changesets.
 
 ### Describe the change
+
+Keep changelog and changeset entries concise, simple, and scannable—often a single sentence stating what changed and any required user action (such as migration or breaking-change steps). Do not turn a changeset into a release announcement, feature walkthrough, or full inventory of sub-APIs, flags, or implementation details; save narrative highlights for announcements and full option or API details for guides or reference.
 
 Use the last published behavior as evidence for what changed. Write that change directly, such as "Now prints the command twice" or "Previously stopped after the first match".
 
@@ -46,7 +48,7 @@ Keep the release used for comparison in the pull or merge request, rather than w
 
 Check how the project's changelog tooling distributes each note. Do not assume package headings restrict which changelogs receive the body. If the tool sends the complete body to every package named in frontmatter, review that whole entry for each recipient.
 
-For each recipient, identify the consumer-visible change and check that the entire entry applies to that package's users. Split independent package-specific API, command, installation, or dependency changes. Keep shared compatibility requirements, producer/consumer contracts, and coordinated migrations together when the full explanation helps each audience. Mention another package only where it helps explain the recipient's change.
+For each recipient, identify the consumer-visible change and check that the entire entry applies to that package's users. Split into separate entries or changesets whenever packages are affected differently—even for connected changes shipped in the same PR or feature (for example, when one package adds a library API and another exposes a command or integration built on it). Share a single entry across multiple packages only when the exact same text belongs in every recipient's changelog, such as an identical compatibility requirement or coordinated migration. Mention another package only when necessary to understand the recipient's own change, and follow dependency direction: a package may mention a package it depends on (citing a dependency API or requirement only as needed context for the recipient's own change, without describing the dependency's release), never a downstream consumer package that depends on it or unrelated APIs, flags, or behavior from another package.
 
 Check which package owns the changed functionality at release time. Check both missing and excess attribution: affected packages need their changes documented, and every recipient needs an applicable entry. Shared version groups or dependency relationships alone do not establish relevance.
 
@@ -62,5 +64,5 @@ Apply the shared review in [SKILL.md](../SKILL.md), then check the relevant docu
 * Are useful workflows, troubleshooting, and advanced options easy to find?
 * Do examples work with the stated setup?
 * Do guides link to reference rather than copy it?
-* Does each release-note recipient receive an applicable, complete account of its changes and required migration steps?
-* Does each release note describe the change without depending on the writer's comparison baseline or unreleased branch history?
+* Does each release-note recipient receive an applicable, concise account of its consumer-visible changes and required migration steps?
+* Does each entry stay concise (not a release announcement or full feature inventory) without leaking unrelated package details or depending on the writer's comparison baseline, internal-only noise, or unreleased branch history?

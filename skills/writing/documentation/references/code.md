@@ -20,9 +20,9 @@ const user = getUserById(id);
 
 ## Document symbols
 
-Describe the behavior, guarantees, and constraints that code using the symbol can rely on. Include errors, side effects, or usage requirements where the signature leaves them unclear. Explain implementation details only when they affect that contract. Do not mechanically fill out every possible field.
+Describe the caller-visible contract—behavior, guarantees, defaults, preconditions, errors, side effects, and usage constraints—where the signature leaves them unclear. Explain implementation details only when they affect that contract, and do not narrate the function body, walk through logic branches step by step, or restate parameter, union, or return types in prose. Do not mechanically fill out every possible field.
 
-For each sentence or tag description, ask what a reader learns beyond the symbol's name, signature, enclosing type, and nearby documentation. "The user ID" adds nothing to `userId: string`. Document only missing semantics that matter to the reader. If no useful information remains, omit the explanatory comment and retain any required metadata.
+For each sentence or tag description, ask what a reader learns beyond the symbol's name, signature, enclosing type, and nearby documentation. "The user ID" adds nothing to `userId: string`, and "Returns null when not found, otherwise returns the record" adds nothing to `findUser(id: string): User | null`. Document only missing semantics that matter to the reader. If no useful information remains, omit the explanatory comment (unless a brief summary is needed for generated API reference to stand alone) and retain any required metadata.
 
 Apply the same test to reasoning. "Uses a map for efficient lookups" merely explains a familiar data structure. Keep rationale when it explains a non-obvious choice or a concrete constraint that a maintainer needs to preserve. Do not invent a justification to give a comment something to say.
 
@@ -41,7 +41,7 @@ Follow established doc-comment formatting and tag usage. For public API boundari
 
 ## Explain implementation constraints
 
-Comment workarounds, ordering requirements, compatibility constraints, unusual values, or redundant-looking guards when a reader could otherwise change them and break behavior. State the local failure and enough of its cause to make the constraint understandable.
+Comment workarounds, ordering requirements, compatibility constraints, unusual values, or redundant-looking guards when a reader could otherwise change them and break behavior. State the local failure and enough of its cause to make the constraint understandable. Do not write inline comments that merely narrate what the next branch, loop, or assignment already shows.
 
 ```ts
 // Keep these requests sequential; the upstream service only guarantees
@@ -69,7 +69,7 @@ Comment locally surprising choices or entries whose modification would break som
 
 Attach a doc comment directly to the public or internal symbol it describes. Put implementation rationale beside the line or block someone might change. Avoid distant comments that require searching to find their subject.
 
-Doc comments must not reference repository notes or internal documentation, whether the symbol is public or internal. Regular implementation comments may do so only when the reference cannot reach consumers. Keep the essential local constraint beside the code so it remains understandable without the link. Do not add requirement IDs merely to label implementing code.
+Doc comments must not reference repository notes or internal documentation, whether the symbol is public or internal (doc comments can surface in IDE hovers, declaration files, or generated reference, and working notes may be pruned). Regular implementation comments may do so only when the reference cannot reach consumers. Keep the essential local constraint beside the code so it remains understandable without the link. Do not add requirement IDs merely to label implementing code.
 
 Default to no module header. A synopsis, ownership declaration, export inventory, or requirement pointer does not earn a header merely by being short.
 
@@ -82,7 +82,7 @@ Required license notices and tooling directives are exempt from this default. Co
 Apply the shared review in [SKILL.md](../SKILL.md), then check:
 
 * Does the comment form match its subject rather than the symbol's visibility?
-* Does each sentence and tag description add information beyond the name, types, surrounding context, and other prose, or serve a clear purpose in generated reference?
+* Does each sentence and tag description add information beyond the name, types, control flow, surrounding context, and other prose, or serve a clear purpose in generated reference?
 * Does each workaround retain the warning needed to prevent a harmful change?
 * Are comments close to their subjects and still accurate?
 * Are note links confined to regular comments that cannot reach consumers?
