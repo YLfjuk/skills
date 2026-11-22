@@ -7,7 +7,7 @@ description: Standards for writing TypeScript code — types, enums, mappers, sc
 
 Standards for how TypeScript is written here.
 
-**Precedence.** Existing standards supersede this guide — the organization's, the language's, the framework's, and the repo's own, in that order. Refactor existing code toward these standards only when asked to.
+**Precedence.** Existing standards supersede this guide — highest priority first: mandatory organization policies, the repo's own standards, the framework's, and the language's. Refactor existing code toward these standards only when asked to.
 
 ## Type vs Interface
 

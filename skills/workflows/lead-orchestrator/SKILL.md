@@ -108,7 +108,7 @@ Maintain a durable checkpoint outside installed skills and unrelated target chec
 - Write each brief for its assignment, including relevant accepted decisions, scope and acceptance criteria, target workspace and exact base or review head, dependencies and holds, model settings, permissions, and the lead's reporting channel.
 - Pass accessible contracts and evidence rather than assuming workers can read the original conversation or local configuration paths.
 - Include the worker coordination boundaries above without sharing sibling identities.
-- Tell each implementor to use the `pr-implementor-babysitter` skill when available for author follow-up, subject to the assignment's permission boundaries.
+- Tell each implementor to use the `pr-implementor-babysitter` skill when available (using the target environment's explicit skill-invocation syntax when applicable) for author follow-up, subject to the assignment's permission boundaries.
 
 ### Launching reviews
 

@@ -7,7 +7,7 @@ description: Where code belongs in a codebase — architectural layers, file and
 
 ## Precedence — read this first
 
-**Existing standards supersede this guide** — the organization's, the language's, the framework's, and the repo's own, in that order. This covers everything here, including rules stated firmly and ones argued on quality grounds.
+**Existing standards supersede this guide** — highest priority first: mandatory organization policies, the repo's own standards, the framework's, and the language's. This covers everything here, including rules stated firmly and ones argued on quality grounds.
 
 Follow the established standard and leave existing code alone. Refactor toward this guide only when explicitly asked to.
 

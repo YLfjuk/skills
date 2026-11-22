@@ -28,7 +28,7 @@ Role metadata: {values required by the role, if any}
 Instance scope and additional instructions: {effective instance settings}
 Coordination boundaries: {scope, communication, or isolation constraints, if any}
 Available relevant skills: {resolved skill names and locations to load}
-Apply pr-review-babysitter when available, subject to the posting mode and ownership below.
+Apply pr-review-babysitter when available (using the target environment's explicit skill-invocation syntax when applicable), subject to the posting mode and ownership below.
 Discover and apply other available skills relevant to this scope and changed code.
 Posting mode: {live, staged, or read-only}
 Ownership: {mode-specific ownership text below}
@@ -80,7 +80,7 @@ The user must select `threads` to authorize separate top-level reviewer conversa
 - **Validation, calibration, and deduplication:**
   - Validate findings against the cited commit, requirements, and current discussion history.
   - Before classifying a change as breaking, verify its public-contract or export visibility and check actual codebase call sites.
-  - Calibrate blocking vs. non-blocking severity by impact and plausibility in the repository's operating context—separating merge-blocking defects from low-probability edge cases or speculative hardening—while preserving helpful non-blocking suggestions as clearly labeled advisory notes rather than suppressing them.
+  - Calibrate blocking vs. non-blocking severity by impact and plausibility in the repository's operating context—separating merge-blocking defects from low-probability edge cases or speculative hardening—while preserving helpful non-blocking suggestions as resolvable threads clearly labeled as advisory/non-blocking and explicitly passing the decision to the implementor or maintainer (for example, noting that it is optional and up to them to adopt or resolve) rather than suppressing them.
   - Consolidate duplicates with each other and existing feedback, retaining contributing instance IDs and evidence. Agreement between reviewers does not replace evidence; preserve substantive disagreement and explain the decision.
 - **Posting, staging, and agreed exceptions:**
   - In `live` posting mode, post one actionable discussion per concern using a resolvable mechanism when available (or track resolution in the checkpoint if the host lacks one), unless a role's procedure requires separate discussions per related location.
@@ -90,7 +90,7 @@ The user must select `threads` to authorize separate top-level reviewer conversa
   - **Agent-authored** *(agent decided on or substantially wrote the point)*: `**Agent-authored** by {agent/model identity} ({role or instance, if applicable}).`
   - **Agent-assisted at the user's direction** *(user directed the substance and asked the agent to phrase or post it)*: `**Agent-assisted** by {agent/model identity} at the user's direction (on behalf of {user handle, if known}).`
   - This distinction depends on who directed the substance, even when posted from a shared account. Never imply a human wrote an agent comment.
-- **Verification and resolution:** Verify the substance of a fix or explanation before marking a concern addressed. Resolve only discussions owned by the configured posting owner unless otherwise authorized. Do not treat a host's resolved status as proof of a fix. Scope completion summaries to finished instances and named commits.
+- **Verification and resolution:** Verify the substance of a fix or explanation before marking a concern addressed. Resolve only discussions owned by the configured posting owner unless otherwise authorized; allow the implementor to self-resolve a thread without waiting only when they applied a suggested diff in full, line for line, covering the entire concern, or when the thread was explicitly marked as a non-blocking advisory left to their discretion (still checking its status and any resulting change on later passes). Do not treat a host's resolved status as proof of a fix. Whenever a newer review pass supersedes an earlier self-owned hold or summary discussion—and before posting a completion summary—audit self-owned resolvable threads and resolve superseded ones with a brief pointer so no stale self-owned thread remains open. Scope completion summaries to finished instances and named commits.
 
 ## Monitoring
 

@@ -82,7 +82,8 @@ Use this workflow when asked to orchestrate or coordinate code reviewers. Own th
 - Link the request and name the reviewed head.
 - Refresh the host state before reporting: open/draft/closed/merged, current head, conflicts, required checks, required approvals, and unresolved review threads.
 - Report whether it is mergeable now as `yes`, `no`, or `unknown`, with the concrete blockers or missing information.
-- Distinguish conflict-free merging from satisfying the host's merge requirements and from your recommendation.
+- Distinguish conflict-free merging, host merge requirements, non-host workflow prerequisites, and your review recommendation—never mislabel a non-host workflow step as a host merge blocker.
+- If required checks fail for non-code CI or runner reasons, report the host check failure factually while noting the non-code cause and any local verification performed.
 - If the head has changed, still report current host mergeability factually for the latest head, but mark the review assessment stale and recommend `wait` (never `merge`) until the new head is reviewed.
 
 ### Scorecard
