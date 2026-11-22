@@ -5,9 +5,9 @@ description: Standards for writing React code — props, JSX, component structur
 
 # React Conventions
 
-Standards for how React is written here. Assumes the `typescript-conventions` skill for enums, mappers, schemas, casts, control flow, and exports, and the `project-structure` skill for file naming and placement.
+Standards for how React is written here.
 
-**Precedence.** Existing standards supersede this guide — the organization's, the language's, the framework's, and the repo's own, in that order. See the precedence rule in `project-structure`. Refactor existing code toward these standards only when asked to.
+**Precedence.** Existing standards supersede this guide — the organization's, the language's, the framework's, and the repo's own, in that order. Refactor existing code toward these standards only when asked to.
 
 ## Props
 
@@ -15,11 +15,11 @@ Name the props type `Props`:
 
 ```tsx
 type Props = {
-	title: string;
+  title: string;
 };
 ```
 
-If the type must be exported, or the file contains multiple components (discouraged — prefer one per file), name it for its component: `CardProps`.
+If the type must be exported, or the file contains multiple components (prefer one per file, except for compound sub-components or tiny module-scope helpers), name it for its component: `CardProps`.
 
 When a component takes children, use `PropsWithChildren`:
 
@@ -29,25 +29,37 @@ import type { PropsWithChildren } from "react";
 type Props = { title: string };
 
 export function Card(props: PropsWithChildren<Props>) {
-	/* ... */
+  /* ... */
 }
 ```
 
-**Do not use `React.FC`.** TypeScript's inference is simpler, safer, and avoids implicit `children`.
+`PropsWithChildren` makes `children` optional. When callers must provide children, declare `children: ReactNode` directly on `Props` instead (note that `ReactNode` still permits `null` and `undefined`).
+
+**Do not use `React.FC`.** It can't type a generic component directly, forces a variable annotation over a function declaration, and adds noise over plain typed `props` with inferred return types.
 
 ### Destructure in the body, not the signature
 
 ```tsx
 // ✅ Preferred
-export function Card(props: Props) {
-	const { title, children } = props;
+export function Card(props: PropsWithChildren<Props>) {
+  const { title, children } = props;
 
-	return <div>{title}</div>;
+  return (
+    <div>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  );
 }
 
 // ⚠️ Acceptable for very simple components
-export function Card({ title, children }: Props) {
-	return <div>{title}</div>;
+export function Card({ title, children }: PropsWithChildren<Props>) {
+  return (
+    <div>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  );
 }
 ```
 
@@ -65,7 +77,9 @@ Body destructuring is clearer when debugging and makes it easy to add defaults, 
 
 ```tsx
 export function Button(props: Props) {
-	const { title, isDisabled = false, onClick, onClose = noop, ref, children, ...rest } = props;
+  const { title, isDisabled = false, onClick, onClose = noop, ref, children, ...rest } = props;
+
+  /* ... */
 }
 ```
 
@@ -82,24 +96,27 @@ export function Button(props: Props) {
 <Component key={key} ref={ref} isEnabled prop={"value"} label={label} onClick={handleClick} />
 ```
 
+Place `{...rest}` by override semantics (before explicit props that should override it, or after defaults) rather than in a fixed band.
+
 **Braces on string props**, including literals: `prop={"value"}`, not `prop="value"`. Every other value needs the braces anyway, so this keeps one shape at every call site. This applies to props only — plain text children stay unwrapped: `<div>text</div>`.
 
-Most configs set `react/jsx-curly-brace-presence` to `never` for props, which will strip these on `--fix`. Configure it to match:
+Some linter configs strip curly braces from string props on `--fix` (and `jsx-curly-brace-presence` defaults to `"never"`). Configure it to match:
 
 ```jsonc
-"react/jsx-curly-brace-presence": ["error", { "props": "always" }]
+// e.g. eslint (or equivalent linter rule)
+"react/jsx-curly-brace-presence": ["error", { "props": "always", "children": "never" }]
 ```
 
 **Note the two orders differ deliberately.** `ref` is second at the call site and fifth in the destructure. At the call site `key` and `ref` are identity and meta, so they surface where a reader scans first; in the body they're passthrough plumbing you rarely touch, so they sink next to `children` and `...rest`.
 
 ## Component declaration
 
-Use **function declarations**. Arrow functions are for small one-liner components, or components declared inside another component or method.
+Use **function declarations**. Arrow functions are for small one-liner components. Never define a component inside another component's render body — each render creates a new component identity, causing React to unmount and remount its subtree and lose state.
 
 ```tsx
 // ✅
 export function Card(props: Props) {
-	/* ... */
+  /* ... */
 }
 
 // ✅ one-liner
@@ -112,65 +129,72 @@ Use the compound pattern for elements meant to be used together:
 
 ```tsx
 export function Dropdown(props: PropsWithChildren) {
-	const { children } = props;
+  const { children } = props;
 
-	return <div>{children}</div>;
+  return <div>{children}</div>;
 }
 
 Dropdown.Item = DropdownItem;
 ```
 
-The sub-component can be inline or imported from its own file — `./dropdown-item.tsx`, kebab-case like any other file.
+The sub-component can live in the same file (at module scope) or be imported from its own file — `./dropdown-item.tsx`, kebab-case like any other file.
 
 ## Component body order
 
 1. **Props destructure**
 2. **Hooks and constants** the hooks or effects depend on
 3. **Effects**
-4. **Other constants** — derived values and handlers used only by the JSX
-5. **Early returns**
+4. **Early returns**
+5. **Other constants** — derived values and handlers used only by the JSX
 6. **JSX**
 
 ```tsx
 export function UserPanel(props: Props) {
-	const { userId, onSelect } = props;
+  const { userId, onSelect } = props;
 
-	const containerRef = useRef<HTMLDivElement>(null);
-	const { data, isLoading } = useUser(userId);
-	const sortedItems = useMemo(() => sort(data), [data]);
+  const [isOpen, setIsOpen] = useState(false);
+  const { data, isLoading } = useUser(userId);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sortedItems = useMemo(() => (data ? sort(data.items) : []), [data]);
 
-	useEffect(() => {
-		/* ... */
-	}, [userId]);
+  useEffect(() => {
+    /* ... */
+  }, [userId]);
 
-	const label = formatLabel(sortedItems);
+  if (isLoading) return <Spinner />;
+  if (!data) return null;
 
-	function handleSelect() {
-		setIsOpen(false);
-		onSelect?.();
-	}
+  const label = formatLabel(data.name, sortedItems);
 
-	if (isLoading) return <Spinner />;
-	if (!data) return null;
+  function handleSelect() {
+    setIsOpen(false);
+    onSelect?.();
+  }
 
-	return <div ref={containerRef}>{label}</div>;
+  return (
+    <div ref={containerRef}>
+      <button aria-expanded={isOpen} onClick={handleSelect}>
+        {label}
+      </button>
+    </div>
+  );
 }
 ```
 
-**What separates band 2 from band 4:** anything a hook or effect needs goes above the effects; anything only the JSX needs goes below.
+**What separates band 2 from band 5:** all hooks (and anything a hook or effect needs) go above the early returns; plain derived values and handlers used only by the JSX go after the early returns, where values are already narrowed and early exits skip unnecessary work.
 
-Within band 2, prefer `useRef` → `useMemo` → `useCallback`. This is a soft preference — dependencies between hooks, or on non-hook values, override it.
+Within band 2, prefer state and data hooks, then `useRef` → `useMemo` → `useCallback`. This is a soft preference — dependencies between hooks, or on non-hook values, override it.
 
-Early returns over a top-level ternary, and over nesting generally — see the control flow section of `typescript-conventions`.
+Early returns over a top-level ternary, and over nesting generally.
 
 ## Event handlers
 
-**`onX` for props, `handleX` for internal wrappers.** A `handleX` wrapper should do something beyond forwarding — its name tells the reader there's extra logic to find.
+**`onX` for props, `handleX` for internal wrappers.** A `handleX` wrapper should do something beyond forwarding — its name tells the reader there's extra logic to find. Pass a prop straight through when signatures match; wrapping to adapt arguments or drop a DOM event counts as real work.
 
 ```tsx
 // ❌ pointless wrapper
-function handleClick() {
-  onClick();
+function handleClick(event: MouseEvent<HTMLButtonElement>) {
+  onClick(event);
 }
 <button onClick={handleClick} />
 
@@ -191,49 +215,52 @@ Call an optional handler with `onClick?.()`. When the destructure supplied a def
 
 Follow React's [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) — **avoid unnecessary effects.**
 
-When an effect genuinely must handle an event, pair it with [`useEffectEvent`](https://react.dev/reference/react/useEffectEvent).
+When an effect needs to read the latest props, state, or callbacks without re-running when they change, extract that genuinely non-reactive logic with [`useEffectEvent`](https://react.dev/reference/react/useEffectEvent) (React 19.2+). Keep Effect Events out of dependency arrays, call them only from effects, and don't use them to hide real reactive dependencies.
 
 Place effects after all other hooks, per the body order above.
 
-Custom hooks return an object once there are more than two values; a tuple is fine for one or two.
+Custom hooks return an object once there are more than two values (a bare value for one; a tuple or object for two).
 
-When a hook takes an options object, name the type `Options`, paralleling `Props`:
+When a hook takes an options object, name the type `Options`, paralleling `Props` (or `UseUserOptions` if it must be exported):
 
 ```ts
 type Options = { userId: string; isEnabled?: boolean };
 
-export function useUser(options: Options) {}
+export function useUser(options: Options) {
+  /* ... */
+}
 ```
 
-A hook taking a single bare value needs no type at all — don't wrap one argument in an object to have somewhere to put the name.
+A hook taking a single bare value needs no named `Options` type — don't wrap one argument in an object to have somewhere to put the name.
 
 ## Keys
 
-Never use an array index as `key`. React reuses the wrong component instance on reorder, insert, or delete, which corrupts state silently.
+Don't use an array index as `key`. React reuses the wrong component instance on reorder, insert, or delete, which corrupts state silently.
 
 ```tsx
-{
-	items.map((item) => <Row key={item.id} />);
-} // ✅
-{
-	items.map((item, index) => <Row key={index} />);
-} // ❌
+// ✅
+{items.map((item) => <Row key={item.id} />)}
+
+// ❌
+{items.map((item, index) => <Row key={index} />)}
 ```
 
-Enforced by `react/no-array-index-key`. A constant, predefined array that never reorders is the harmless case, but enable the rule and disable it inline there rather than relying on judgment.
+Enforce this with a linter rule (e.g., `react/no-array-index-key` in ESLint). For a constant, predefined array that never reorders, prefer a unique primitive value itself (`key={step}`) when available; otherwise keep the rule enabled and disable it inline rather than relying on judgment.
 
-## React 18
+## Older React versions
 
-React 19 is the target. On 18, two things change:
+React 19 is the target. On older versions, two things change:
 
-- **`ref` is not a prop.** Use `forwardRef`, taking `ref` as the second argument. Such a component is a `const`, not a function declaration, and `ref` drops out of the props destructure order.
+- **React 18 — `ref` is not a prop.** Components that accept a `ref` use `forwardRef`, taking `ref` as the second argument. Such a component is a `const` wrapping a named function expression (preserving DevTools `displayName`), and `ref` drops out of the props destructure order.
 
-    ```tsx
-    export const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
-    	const { value, onChange, ...rest } = props;
-    });
-    ```
+  ```tsx
+  export const Input = forwardRef<HTMLInputElement, Props>(function Input(props, ref) {
+    const { value, onChange, ...rest } = props;
 
-- **`useEffectEvent` doesn't exist** — it shipped stable in 19.2. Use a local equivalent or the `useRef` pattern.
+    return <input ref={ref} {...rest} value={value} onChange={onChange} />;
+  });
+  ```
+
+- **Before React 19.2 (18 and 19.0–19.1) — `useEffectEvent` isn't available yet.** Sync the latest callback into a ref inside `useLayoutEffect` (or `useEffect`) rather than mutating `ref.current` during render.
 
 Everything else applies unchanged.
