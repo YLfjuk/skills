@@ -5,9 +5,9 @@ description: Standards for writing TypeScript code — types, enums, mappers, sc
 
 # TypeScript Conventions
 
-Standards for how TypeScript is written here. For **where** files go and what they're named, see the `project-structure` skill — this skill covers the constructs themselves.
+Standards for how TypeScript is written here.
 
-**Precedence.** Existing standards supersede this guide — the organization's, the language's, the framework's, and the repo's own, in that order. See the precedence rule in `project-structure`. Refactor existing code toward these standards only when asked to.
+**Precedence.** Existing standards supersede this guide — the organization's, the language's, the framework's, and the repo's own, in that order. Refactor existing code toward these standards only when asked to.
 
 ## Type vs Interface
 
@@ -21,7 +21,9 @@ Prefer `type`. Reach for `interface` in two cases only:
 type User = { id: string; name: string };
 
 // ⚠️ Justified — extending a large built-in
-interface Props extends React.HTMLAttributes<HTMLDivElement> {}
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
+  variant: "default" | "muted";
+}
 ```
 
 ## Discriminated unions
@@ -36,13 +38,13 @@ type Result = { isSuccess: boolean; data?: User; error?: Error };
 type Result = { isSuccess: true; data: User } | { isSuccess: false; error: Error };
 ```
 
-This is what makes the no-cast rule livable — an optional-field bag forces `result.data!` after checking the flag, while the union hands you the field already narrowed.
+This is what makes the no-cast rule livable — an optional-field bag forces `result.data!` after checking the flag, while the union hands you the field already narrowed. Once a discriminated union has more than two cases, use a string-literal discriminant (such as `status` or `kind`) rather than booleans.
 
 Not every optional field wants this. A shape with independently optional fields that don't correlate is a bag of options, not a set of cases, and forcing a union on it invents distinctions that don't exist.
 
 ## Enums
 
-**Never use the `enum` keyword.** It emits a runtime object, doesn't narrow the way a union does, and `const enum` breaks under isolated modules.
+**Never use the `enum` keyword.** It emits non-erasable runtime code (rejected by `erasableSyntaxOnly` in newer TypeScript versions), string enums are nominal (`"draft"` isn't assignable to `Status`), and `const enum` is fragile under `isolatedModules`.
 
 ```ts
 enum DoNotUseThisKeyword {} // ❌
@@ -54,6 +56,7 @@ Use an object with `as const`, aliased by a type of the same name:
 const Status = {
  Draft: "draft",
  Published: "published",
+ Archived: "archived",
 } as const;
 
 type Status = ValueOf<typeof Status>;
@@ -150,11 +153,11 @@ A schema is a value and a type, like an object-enum — but unlike an enum, the 
 
 Which one drives the other depends on whether the project treats schemas or types as its source of truth. This is a project-level decision, not a per-schema one — check what the surrounding code does and match it.
 
-**Schema drives type** — schemas are authoritative:
+**Schema drives type** — schemas are authoritative (using your schema library's inference helper, e.g., `z.infer` or `InferOutput`):
 
 ```ts
 const ValueSchema = /* ... */;
-type Value = infer<typeof ValueSchema>;
+type Value = Infer<typeof ValueSchema>;
 ```
 
 **Type drives schema** — types are authoritative and the schema is one representation of them:
@@ -163,11 +166,11 @@ type Value = infer<typeof ValueSchema>;
 // in the types file
 type Value = { /* ... */ };
 
-const ValueSchema = /* ... */ satisfies SchemaType<Value>;
-type ValueShape = infer<typeof ValueSchema>;
+const ValueSchema = /* ... */ satisfies Schema<Value>;
+type ValueShape = Infer<typeof ValueSchema>;
 ```
 
-`satisfies` catches most drift; inferring back out as `ValueShape` lets you compare the schema's actual output against the hand-written type.
+`satisfies` catches most drift; inferring back out as `ValueShape` lets you verify exact compatibility against the hand-written type in a type test (the alias alone doesn't run a check).
 
 Schemas compose — field schemas built up into larger ones are one cohesive concept and share a file. Keep schema code library-agnostic in principle; the pattern is the same across zod, valibot, and arktype.
 
@@ -178,7 +181,7 @@ When a class has useful accompanying types, export a type-only namespace of the 
 ```ts
 export declare namespace MyService {
   export type Config = { /* ... */ };
-  export type inferSomething<T> = /* ... */;
+  export type InferSomething<T> = /* ... */;
 }
 
 export class MyService { /* ... */ }
@@ -186,7 +189,7 @@ export class MyService { /* ... */ }
 
 ## No type casts
 
-**`as` is banned except for `as const`.** Use `satisfies`, type guards, or narrowing from `unknown`. The same goes for the non-null assertion `!` — it's a cast with different punctuation.
+**No type assertions (`as`, except `as const`) or non-null assertions (`!`) in normal code.** Use `satisfies`, type guards, or narrowing from `unknown` — `!` is a cast with different punctuation.
 
 ```ts
 // ✅
@@ -197,27 +200,27 @@ log((error as Error).message);
 log(error!.message);
 ```
 
-A cast tells the compiler to stop checking; `satisfies` and guards keep it checking. When a cast feels necessary, the type is usually wrong somewhere upstream.
+A cast tells the compiler to stop checking; `satisfies` and guards keep it checking. When a cast feels necessary, the type is usually wrong somewhere upstream. In the rare low-level generic or overload implementation where TypeScript genuinely cannot verify a sound return type, isolate the narrowest possible assertion behind that helper boundary and explain why it holds.
 
-`Object.entries()` is a common trap here — it widens keys to `string` even on a typed record, and the reflex is `as`. Reach for `keyof` / `ValueOf` instead.
+`Object.entries()` is a common trap here — it widens keys to `string` even on a typed record, and the reflex is `as` at every call site. Prefer iterating a typed key collection (such as `Object.values(Status)`) instead; only wrap `Object.entries()` in a typed helper when runtime enumerable keys are guaranteed to match the declared key set.
 
 ### unknown over any
 
-`any` is a cast that spreads: it disables checking for everything it touches. Use `unknown` and narrow.
+`any` is a cast that spreads: it disables checking for everything it touches. Use `unknown` and narrow — including for boundary APIs that return `any` (`res.json()`, `JSON.parse()`), which should be treated as `unknown` and validated or narrowed at the boundary instead of cast.
 
 ```ts
 function parse(input: unknown) {} // ✅
 function parse(input: any) {} // ❌
 ```
 
-**Type-level positions are the exception.** In generic constraints, `unknown` breaks variance and `any` is the working answer:
+**Generic constraints are the exception.** Where a constraint has to accept any instantiation, `unknown` breaks variance (such as contravariant function parameters) and `any` is the working answer — keep `unknown` in covariant positions like return types when `any` isn't needed:
 
 ```ts
-function formatCallback<T extends (...args: any[]) => any>(fn: T) {}
+function formatCallback<T extends (...args: any[]) => unknown>(fn: T) {}
 function formatData<T extends Data<any, any, any>>(data: T) {}
 ```
 
-This comes up most in package code, where a constraint has to accept any instantiation. `any` in a value position is still a smell.
+This comes up most in package code. `any` in a value position is still a smell.
 
 ## Generics
 
@@ -242,11 +245,11 @@ Annotate when:
 - it's **library code**, where an explicit signature is part of the contract and worth being in the reader's face;
 - **`isolatedDeclarations` is enabled**, which requires it.
 
-`isolatedDeclarations` is worth weighing rather than defaulting on: it forces explicit annotations on exported values, which fights the `as const` + `ValueOf` enum pattern above — the whole point there is that the type is derived from the value.
+`isolatedDeclarations` is worth weighing rather than defaulting on: it forces explicit annotations on exported values whose types aren't trivially inferable, which fights derived-from-value patterns above (derived or spread enums, `as const satisfies` mappers, and inferred schemas) — the whole point there is that the type is derived from the value.
 
 ## Iteration
 
-**`for...of` over `.forEach`.** `await`, `break`, `continue`, and `return` all work in a loop and none work in a callback, so the loop never has to be rewritten when the body grows.
+**`for...of` over `.forEach`.** `await`, `break`, `continue`, and `return` work as expected in a loop; in `.forEach`, `break`/`continue` aren't available, `return` only exits the callback, and returned promises are ignored — so a loop never has to be rewritten when the body grows.
 
 ```ts
 // ✅
@@ -255,14 +258,14 @@ for (const user of users) {
  if (user.isArchived) continue;
 }
 
-// ❌ can't await, can't break; return only exits the callback
+// ❌ ignores returned promises, can't break; return only exits the callback
 users.forEach(async (user) => {
  /* ... */
 });
 ```
 
 - Indexed `for (let i = 0; ...)` only when the index is actually used.
-- `Object.entries()` for objects.
+- `Object.entries()` for objects (or iterate a typed key collection / narrow typed wrapper when the runtime key set is closed).
 - `.map` and `.filter` on their own are fine — they're expressions returning values.
 
 **`flatMap` over a `filter`+`map` chain.** Return the value for a match, `[]` to skip:
@@ -320,7 +323,7 @@ This applies anywhere a branch can exit — guard clauses in functions, `continu
 **Named exports only.** The exception is where a framework requires a default — Next.js pages and layouts, config files, and similar tool-owned files.
 
 ```jsonc
-// eslint
+// e.g. eslint (or equivalent linter rule)
 "import/no-default-export": "error"   // with an override for framework paths
 ```
 
@@ -328,7 +331,7 @@ This applies anywhere a branch can exit — guard clauses in functions, `continu
 
 Apply `readonly` where it prevents a real bug, not as blanket documentation:
 
-- **Array and tuple parameters** get `readonly T[]`. A callee mutating a caller's array is a live bug and the annotation costs one word.
+- **Array and tuple parameters** get `readonly T[]` (or `readonly [A, B]` for tuples). A callee mutating a caller's array or tuple is a live bug and the annotation costs one word.
 - `as const` already gives deep readonly on literals, mappers, and object-enums.
 - **Skip props and nested object types.** `Readonly<T>` is shallow, so deep immutability isn't something the type system supports cheaply — the annotations become noise that gets dropped inconsistently.
 
@@ -351,28 +354,29 @@ Assume `strict: true`. Only what it doesn't already cover is listed here.
 }
 ```
 
-`verbatimModuleSyntax` makes type-only imports a compiler error rather than a convention (TS1484) and keeps import statements intact in the emitted output.
+`verbatimModuleSyntax` makes importing a type without an explicit `type` modifier a compiler error (TS1484), erases `type`-marked imports, and leaves value imports untouched in emitted output.
 
-`noUncheckedIndexedAccess` types `arr[0]` as `T | undefined`. It's the flag that gives the no-cast rule teeth, since the usual escape hatch is `arr[0]!` — a non-null assertion is a cast wearing different punctuation. Narrow it instead:
+Keep type imports as top-level statements, separate from value imports:
+
+```ts
+import type { User } from "./types";
+import { ProfileService } from "./services/profile";
+```
+
+```jsonc
+// e.g. eslint (or equivalent linter rules)
+"@typescript-eslint/consistent-type-imports": ["error", { "fixStyle": "separate-type-imports" }], // autofix style
+"import/consistent-type-specifier-style": ["error", "prefer-top-level"]                           // enforces top-level statements
+```
+
+This mirrors `export type * from './types'` on the export side — type and value movement stay visually distinct in both directions.
+
+`noUncheckedIndexedAccess` types `arr[0]` as `T | undefined`. It's the flag that gives the no-cast rule teeth, since the usual escape hatch is `arr[0]!`. Narrow it instead:
 
 ```ts
 const first = users[0];
-if (!first) return;
+if (first === undefined) return;
 // first is User here
 ```
 
 `exactOptionalPropertyTypes` is **not required, but not discouraged either** — a per-package choice. It distinguishes an absent property from one explicitly set to `undefined`, which pays off well in packages where that difference carries meaning: patch and partial-update APIs, anything serializing to JSON, config merging. In packages without that distinction it mostly generates churn. Enable it where it earns its keep; don't add it uniformly and don't strip it where someone already has.
-
-```jsonc
-// eslint
-"@typescript-eslint/consistent-type-imports": ["error", { "fixStyle": "separate-type-imports" }]
-```
-
-Type imports are top-level statements, kept separate from value imports:
-
-```ts
-import type { User } from "./types";
-import { getUser } from "./services/get-user";
-```
-
-This mirrors `export type * from './types'` on the export side — type and value movement stay visually distinct in both directions.
