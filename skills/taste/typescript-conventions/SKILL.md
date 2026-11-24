@@ -329,11 +329,11 @@ This applies anywhere a branch can exit — guard clauses in functions, `continu
 
 ## readonly
 
-Apply `readonly` where it prevents a real bug, not as blanket documentation:
+Apply `readonly` where it prevents a real bug or expresses an immutable contract, not as blanket ceremony:
 
 - **Array and tuple parameters** get `readonly T[]` (or `readonly [A, B]` for tuples). A callee mutating a caller's array or tuple is a live bug and the annotation costs one word.
 - `as const` already gives deep readonly on literals, mappers, and object-enums.
-- **Skip props and nested object types.** `Readonly<T>` is shallow, so deep immutability isn't something the type system supports cheaply — the annotations become noise that gets dropped inconsistently.
+- **Don't force `readonly` on every object property or nested type.** Using `readonly` on object properties is fine when fields shouldn't be mutated (such as value objects, discriminants, or public contracts) — don't strip it where it's already used. Just don't require `readonly` or `Readonly<T>` everywhere when it becomes noisy or inconvenient; `Readonly<T>` is shallow, so deep immutability isn't something the type system supports cheaply.
 
 `eslint-plugin-functional`'s `prefer-immutable-types` can enforce this broadly if the tradeoff ever changes.
 
