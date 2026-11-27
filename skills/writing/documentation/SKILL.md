@@ -5,7 +5,7 @@ description: Write, review, and organize project documentation, including README
 
 # Documentation
 
-Write the explanation the reader needs at the place they need it. Document useful intent, behavior, constraints, and usage. Names, types, and obvious implementation usually need no prose.
+Write the explanation the reader needs at the place they need it. Document useful intent, behavior, constraints, and usage. Do not write prose for what names, types, and straightforward code already show.
 
 ## Choose the reference
 
@@ -22,7 +22,7 @@ Read only the references relevant to the task. Their scopes overlap when public 
 
 Use the minimum explanation that preserves useful meaning. Describe consumer contracts for symbols, and reasons or failure consequences for maintainers. A symbol's consumers include code that uses it within the repository. Explain implementation mechanics only when they matter to usage or safe changes.
 
-Avoid tautological explanations that restate a name, signature, type, nearby code, or an earlier sentence without adding meaning. Do not narrate control flow or logic branches step by step, translate types into prose, or pad documentation with excessive detail—such as internal mechanics, unrequested background, or repetitive boilerplate—that obscures what the reader needs. Judge redundancy against what the intended reader can see and reasonably understand. API reference and external docs may need a plain-language summary or a brief restatement to stand alone, teach an unfamiliar concept, or emphasize a consequential constraint. Keep repetition when it serves that purpose, rather than adding prose for completeness.
+Avoid tautological explanations that restate a name, signature, type, nearby code, or an earlier sentence without adding meaning. Start with the non-obvious fact instead of opening with a definition or topic sentence that paraphrases the subject. Do not narrate control flow or logic branches step by step, translate types into prose, or pad documentation with excessive detail—such as internal mechanics, unrequested background, or repetitive boilerplate—that obscures what the reader needs. Judge redundancy against what the intended reader can see and reasonably understand. External docs may need a plain-language summary to stand alone, teach an unfamiliar concept, or emphasize a consequential constraint. Generated API reference already shows names, signatures, and types, so being exported does not justify summary prose unless a symbol introduces a genuinely unfamiliar domain concept. When revising existing documentation, cut redundant prose before rewording what remains.
 
 If confusing code is the only reason a comment is needed, first consider clearer names, types, control flow, or structure. Keep warnings about non-obvious behavior even when the code is otherwise clear.
 

@@ -6,25 +6,22 @@ Use this reference for doc comments, regular implementation comments, configurat
 
 Choose by what the comment describes, not whether the symbol is exported:
 
-* A doc comment describes a symbol's purpose, behavior, or contract for code that uses it.
+* A doc comment describes a symbol's non-obvious behavior, guarantees, or contract for code that uses it.
 * A regular comment explains the reason or constraint behind a particular line or block.
 
 Internal functions, types, and constants may have doc comments under the same rules as public symbols. Their consumers are the code elsewhere in the repository that uses them.
 
-A symbol whose name and type already communicate its purpose and behavior needs no explanatory doc comment, exported or not. Required metadata tags, such as `@since` for a new public API, still apply. Regular comments should also add information beyond the code. For example, this adds nothing:
-
-```ts
-// Get the user by ID
-const user = getUserById(id);
-```
+A symbol whose name and type already communicate its behavior needs no explanatory doc comment, exported or not; keep only required metadata tags such as `@since`. Regular comments must likewise add information beyond the code.
 
 ## Document symbols
 
 Describe the caller-visible contract—behavior, guarantees, defaults, preconditions, errors, side effects, and usage constraints—where the signature leaves them unclear. Explain implementation details only when they affect that contract, and do not narrate the function body, walk through logic branches step by step, or restate parameter, union, or return types in prose. Do not mechanically fill out every possible field.
 
-For each sentence or tag description, ask what a reader learns beyond the symbol's name, signature, enclosing type, and nearby documentation. "The user ID" adds nothing to `userId: string`, and "Returns null when not found, otherwise returns the record" adds nothing to `findUser(id: string): User | null`. Document only missing semantics that matter to the reader. If no useful information remains, omit the explanatory comment (unless a brief summary is needed for generated API reference to stand alone) and retain any required metadata.
+Start directly with the non-obvious contract, default, unit, or edge case—even if that leaves a single short phrase. Do not open with a definition or topic sentence that paraphrases the symbol's name, parameters, or fields before stating the real constraint.
 
-Apply the same test to reasoning. "Uses a map for efficient lookups" merely explains a familiar data structure. Keep rationale when it explains a non-obvious choice or a concrete constraint that a maintainer needs to preserve. Do not invent a justification to give a comment something to say.
+For each sentence or tag description, ask what a reader learns beyond the symbol's name, signature, enclosing type, and nearby documentation. "The user ID" adds nothing to `userId: string`, and "Returns null when not found, otherwise returns the record" adds nothing to `findUser(id: string): User | null`. Generated API reference already displays names, signatures, and types, so being exported does not justify summary prose. Document only missing semantics that matter to the reader. If nothing non-obvious remains, delete the prose completely—leave no comment, or retain only required metadata such as `/** @since @next */`.
+
+Apply the same test to reasoning. "Uses a map for efficient lookups" merely explains a familiar data structure. State the local constraint or consequence directly rather than lecturing on general language, type-system, or library mechanics. Keep rationale when it explains a non-obvious choice or a concrete constraint that a maintainer needs to preserve. Do not invent a justification to give a comment something to say.
 
 A non-exported helper can still need a behavioral guarantee:
 
@@ -41,7 +38,7 @@ Follow established doc-comment formatting and tag usage. For public API boundari
 
 ## Explain implementation constraints
 
-Comment workarounds, ordering requirements, compatibility constraints, unusual values, or redundant-looking guards when a reader could otherwise change them and break behavior. State the local failure and enough of its cause to make the constraint understandable. Do not write inline comments that merely narrate what the next branch, loop, or assignment already shows.
+Comment workarounds, ordering requirements, compatibility constraints, unusual values, or redundant-looking guards when a reader could otherwise change them and break behavior. State the local failure and enough of its cause to make the constraint understandable. Do not write inline comments that merely narrate what the next branch, loop, pass, or assignment already shows; comment only an invariant the code does not make visible, such as why one step must finish before the next starts.
 
 ```ts
 // Keep these requests sequential; the upstream service only guarantees
@@ -79,10 +76,12 @@ Required license notices and tooling directives are exempt from this default. Co
 
 ## Review
 
+Evaluate every comment beside the declaration and code it annotates, not in isolation. During a revision pass, cut redundant sentences and whole comments before rewording what remains, and never expand unnecessary prose to satisfy style preferences.
+
 Apply the shared review in [SKILL.md](../SKILL.md), then check:
 
 * Does the comment form match its subject rather than the symbol's visibility?
-* Does each sentence and tag description add information beyond the name, types, control flow, surrounding context, and other prose, or serve a clear purpose in generated reference?
+* Does each sentence and tag description add information beyond the name, types, control flow, surrounding context, and other prose, without opening with a redundant topic sentence?
 * Does each workaround retain the warning needed to prevent a harmful change?
 * Are comments close to their subjects and still accurate?
 * Are note links confined to regular comments that cannot reach consumers?
